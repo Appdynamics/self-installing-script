@@ -1,3 +1,34 @@
+param (
+    [int]$ProxyEnabled = 0,#0=no proxy,1=user IE, 2=inform proxy adddress manually 
+    [string]$ProxyAddress = ""
+)
+
+if ($ProxyEnabled -ne 0){
+    if ($ProxyEnabled -eq 2){
+        if($ProxyAddress -eq ""){
+            Write-Output "Proxy address not informed. Usage: build_installer.ps1 -ProxyEnabled 2 -ProxyAddress <host>:<port>"
+            exit 1
+        }
+    } 
+    else{
+        $HKCU_exist = Test-Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings'
+        if ($HKCU_exist -eq $true){
+            $ProxyAddress=(get-itemproperty 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings').ProxyServer
+        }
+        else{
+            Write-Output "Proxy system configuration does not exist. Please make sure you have this on the registry and try again..."
+            Write-Output "Aborting..."
+            exit 1
+        }
+    }
+    $credentials = Get-Credential
+    $proxy = new-object System.Net.WebProxy
+    $proxy.Address = $ProxyAddress
+    $proxy.BypassProxyOnLocal = $false
+    $proxy.BypassList = "" 
+    $proxy.Credentials = $credentials
+}
+
 Write-Output "Starting to generate script installer..."
 Write-Output "Getting the current directory.."
 $location = Get-Location
@@ -13,6 +44,9 @@ if ($agent_downloaded -ne "TRUE"){
     Write-Output "Downloading Java agent..."
     Do{
         $WebClient = New-Object System.Net.WebClient
+        if ($ProxyEnabled -ne 0){
+            $WebClient.Proxy=$proxy
+        }
         $WebClient.DownloadFile("https://download-files.appdynamics.com/download-file/sun-jvm/4.5.16.28759/AppServerAgent-4.5.16.28759.zip",$location.path+$directory_separator+"AppServerAgent-4.5.16.28759.zip")
         $full_path=$location.path
         $full_path=$full_path+$directory_separator+"AppServerAgent-4.5.16.28759.zip"
@@ -33,6 +67,9 @@ if ($agent_downloaded -ne "TRUE"){
         }
     } While ($download_successful –eq 0)
 }
+else{
+    Write-Output "Java agent already present, skiping download and continuing.."
+}
 
 $download_successful  = 0
 
@@ -43,6 +80,9 @@ if ($agent_downloaded -ne "TRUE"){
     Write-Output "Downloading Machine agent..."
     Do{
         $WebClient = New-Object System.Net.WebClient
+        if ($ProxyEnabled -ne 0){
+            $WebClient.Proxy=$proxy
+        }
         $WebClient.DownloadFile("https://download-files.appdynamics.com/download-file/machine-bundle/4.5.16.2357/machineagent-bundle-64bit-linux-4.5.16.2357.zip",$location.path+$directory_separator+"machineagent-bundle-64bit-linux-4.5.16.2357.zip")
         $full_path=$location.path
         $full_path=$full_path+$directory_separator+"machineagent-bundle-64bit-linux-4.5.16.2357.zip"
@@ -63,7 +103,9 @@ if ($agent_downloaded -ne "TRUE"){
         } 
     } While ($download_successful –eq 0)
 }
-
+else{
+    Write-Output "Machine agent already present, skiping download and continuing.."
+}
 $download_successful = 0
 
 $full_file_name = $location.path+$directory_separator+"appd-netviz-x64-linux-4.5.10.2050.zip"
@@ -73,6 +115,9 @@ if ($agent_downloaded -ne "TRUE"){
     Write-Output "Downloading Network agent..."
     Do{
         $WebClient = New-Object System.Net.WebClient
+        if ($ProxyEnabled -ne 0){
+            $WebClient.Proxy=$proxy
+        }
         $WebClient.DownloadFile("https://download-files.appdynamics.com/download-file/netviz-linux/4.5.10.2050/appd-netviz-x64-linux-4.5.10.2050.zip",$location.path+$directory_separator+"appd-netviz-x64-linux-4.5.10.2050.zip")
         $full_path=$location.path
         $full_path=$full_path+$directory_separator+"appd-netviz-x64-linux-4.5.10.2050.zip"
@@ -92,10 +137,15 @@ if ($agent_downloaded -ne "TRUE"){
         } 
     } While ($download_successful –eq 0)
 }
+else{
+    Write-Output "Network agent already present, skiping download and continuing.."
+}
+
 $java_agent_path=$location.path+$directory_separator+"AppServerAgent-4.5.16.28759.zip"
 $machine_agent_path=$location.path+$directory_separator+"machineagent-bundle-64bit-linux-4.5.16.2357.zip"
 $network_agent_path=$location.path+$directory_separator+"appd-netviz-x64-linux-4.5.10.2050.zip"
 $destination_path = $location.path+$directory_separator+"agents.zip"
+
 $compress = @{
     LiteralPath = $java_agent_path, $machine_agent_path, $network_agent_path 
     CompressionLevel = "Fastest"
@@ -137,6 +187,7 @@ Write-Output "Removing temp items..."
 Remove-Item $java_agent_path
 Remove-Item $machine_agent_path
 Remove-Item $network_agent_path
+Remove-Item $destination_path
 Write-Output "Done."
 
 exit 0
