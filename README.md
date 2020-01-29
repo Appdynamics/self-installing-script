@@ -9,6 +9,6 @@ Still there is a lot to do, but this is a first version of the script.
 
 # How to use this script
 
-Download the release package and run the powershell script build_installer.ps1. This script will connect to the AppDynamics website, downlaod the agents and generate the agents_installer.sh script.
+Download the release package and run the powershell script build_installer.ps1. This script will connect to the AppDynamics website, download the agents and generate the agents_installer.sh script.
 
 Transfer this script to the linux boxes and proceed with the installation. This will place all the three agents on the right directories with the right permissions. Just the start of the applications will need to be added manually later so apps can load the agent during initialiation.
