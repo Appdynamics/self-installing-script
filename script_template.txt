@@ -1,5 +1,5 @@
 #!/bin/bash
-appd_home="/opt/appdynamics/"
+appd_home="/Users/igor.simoes/Documents/Customers/InternalProjects/self-installing-script/agent_sandbox/"
 is_parameter_valid(){
         if [ "$1" != "" ]; then
                 if [ "$1" == "java" ] | [ "$1" == "" ]; then
@@ -47,26 +47,32 @@ install(){
         fi
 
         if [ $1 == "java" ]; then
-                zip="AppServerAgent-4.5.16.28759.zip"
-                echo "Uniziping..."
+                zip="AppServerAgent-4.5.18.29239.zip"
+                echo "Unziping..."
                 unzip /tmp/agents.zip $zip
+		chmod u+rw $zip
+		chmod a+r $zip
                 unzip $zip
                 rm -rf $zip
-                chmod -R a+w "ver4.5.16.28759/logs"
+                chmod -R a+w "ver4.5.18.29239/logs"
         fi
 
         if [ $1 == "machine" ]; then
-                zip="machineagent-bundle-64bit-linux-4.5.16.2357.zip"
-                echo "Uniziping..."
+                zip="machineagent-bundle-64bit-linux-4.5.18.2430.zip"
+                echo "Unziping..."
                 unzip /tmp/agents.zip $zip
+		chmod u+rw $zip
+                chmod a+r $zip
                 unzip $zip
                 rm -rf $zip
         fi
 
         if [ $1 == "network" ]; then
-                zip="appd-netviz-x64-linux-4.5.10.2050.zip"
-                echo "Uniziping..."
+                zip="appd-netviz-x64-linux-4.5.11.2100.zip"
+                echo "Unziping..."
                 unzip /tmp/agents.zip $zip
+		chmod u+rw $zip
+                chmod a+r $zip
                 unzip $zip
                 rm -rf $zip
                 sudo ./install.sh

@@ -36,24 +36,40 @@ $directory_separator = $([System.IO.Path]::DirectorySeparatorChar)
 
 $download_successful = 0
 $download_tries = 0
-$full_file_name = $location.path+$directory_separator+"AppServerAgent-4.5.16.28759.zip"
+$full_file_name = $location.path+$directory_separator+"AppServerAgent-4.5.18.29239.zip"
 
-$agent_downloaded = Test-Path $full_file_name
+$java_agent_name = "AppServerAgent-4.5.18.29239.zip"
+$java_full_file_name = $location.path+$directory_separator+$java_agent_name
+$java_full_version = "4.5.18.29239"
+$java_download_url = "https://download-files.appdynamics.com/download-file/sun-jvm/"
+$java_hash = "00481c89fe2153bc203a38a8cc143b1da1b769255367c75b71d06cb580461cd6"
+
+$machine_agent_name = "machineagent-bundle-64bit-linux-4.5.18.2430.zip"
+$machine_full_file_name = $location.path+$directory_separator+$machine_agent_name
+$machine_full_version = "4.5.18.2430"
+$machine_download_url = "https://download-files.appdynamics.com/download-file/machine-bundle/"
+$machine_hash = "fb37a98ffc5274c5f33d10e88727e9a07897a79d6d0b55a67bb8b338a19933ea"
+
+$network_agent_name = "appd-netviz-x64-linux-4.5.11.2100.zip"
+$network_full_file_name = $location.path+$directory_separator+$network_agent_name
+$network_full_version = "4.5.11.2100"
+$network_download_url = "https://download-files.appdynamics.com/download-file/netviz-linux/"
+$network_hash = "0e967a554a3b246944a2033ee57901dd4d0ff05a0e9d290020457ada08e71703"
+
+$agent_downloaded = Test-Path $java_full_file_name
 
 if ($agent_downloaded -ne "TRUE"){
-    Write-Output "Downloading Java agent..."
+    Write-Output "Downloading Java agent from $java_download_url$java_full_version/$java_agent_name"
     Do{
         $WebClient = New-Object System.Net.WebClient
         if ($ProxyEnabled -ne 0){
             $WebClient.Proxy=$proxy
         }
-        $WebClient.DownloadFile("https://download-files.appdynamics.com/download-file/sun-jvm/4.5.16.28759/AppServerAgent-4.5.16.28759.zip",$location.path+$directory_separator+"AppServerAgent-4.5.16.28759.zip")
-        $full_path=$location.path
-        $full_path=$full_path+$directory_separator+"AppServerAgent-4.5.16.28759.zip"
-        $hash_info = Get-FileHash $full_path -Algorithm SHA256
+        $WebClient.DownloadFile("$java_download_url$java_full_version/$java_agent_name",$java_full_file_name)
+        $hash_info = Get-FileHash $java_full_file_name -Algorithm SHA256
         $hash = $hash_info.hash
         Write-Output "Comparing hashes..."
-        if ($hash -eq "1dd6a145a0233e22999dc51ea3b923786033dd9467dd71a42e1e8228f55542bb"){
+        if ($hash -eq $java_hash){
             $download_successful = 1
             Write-Output "Hashes match..."
         } 
@@ -73,23 +89,20 @@ else{
 
 $download_successful  = 0
 
-$full_file_name = $location.path+$directory_separator+"machineagent-bundle-64bit-linux-4.5.16.2357.zip"
-$agent_downloaded = Test-Path $full_file_name
+$agent_downloaded = Test-Path $machine_full_file_name
 
 if ($agent_downloaded -ne "TRUE"){
-    Write-Output "Downloading Machine agent..."
+    Write-Output "Downloading Machine agent from $machine_download_url$machine_full_version/$machine_agent_name"
     Do{
         $WebClient = New-Object System.Net.WebClient
         if ($ProxyEnabled -ne 0){
             $WebClient.Proxy=$proxy
         }
-        $WebClient.DownloadFile("https://download-files.appdynamics.com/download-file/machine-bundle/4.5.16.2357/machineagent-bundle-64bit-linux-4.5.16.2357.zip",$location.path+$directory_separator+"machineagent-bundle-64bit-linux-4.5.16.2357.zip")
-        $full_path=$location.path
-        $full_path=$full_path+$directory_separator+"machineagent-bundle-64bit-linux-4.5.16.2357.zip"
-        $hash_info = Get-FileHash $full_path -Algorithm SHA256
+        $WebClient.DownloadFile("$machine_download_url$machine_full_version/$machine_agent_name",$machine_full_file_name)
+        $hash_info = Get-FileHash $machine_full_file_name -Algorithm SHA256
         $hash = $hash_info.hash
         Write-Output "Comparing hashes..."
-        if ($hash -eq "a447e8bc176358c16a453b90768bb2d40cfb868f43a92fdbd4180602b4cee3ce"){
+        if ($hash -eq $machine_hash){
             $download_successful = 1
             Write-Output "Hashes match..."
         }
@@ -108,23 +121,20 @@ else{
 }
 $download_successful = 0
 
-$full_file_name = $location.path+$directory_separator+"appd-netviz-x64-linux-4.5.10.2050.zip"
-$agent_downloaded = Test-Path $full_file_name
+$agent_downloaded = Test-Path $network_full_file_name
 
 if ($agent_downloaded -ne "TRUE"){
-    Write-Output "Downloading Network agent..."
+    Write-Output "Downloading Network agent $network_download_url$network_full_version/$network_agent_name"
     Do{
         $WebClient = New-Object System.Net.WebClient
         if ($ProxyEnabled -ne 0){
             $WebClient.Proxy=$proxy
         }
-        $WebClient.DownloadFile("https://download-files.appdynamics.com/download-file/netviz-linux/4.5.10.2050/appd-netviz-x64-linux-4.5.10.2050.zip",$location.path+$directory_separator+"appd-netviz-x64-linux-4.5.10.2050.zip")
-        $full_path=$location.path
-        $full_path=$full_path+$directory_separator+"appd-netviz-x64-linux-4.5.10.2050.zip"
-        $hash_info = Get-FileHash $full_path -Algorithm SHA256
+        $WebClient.DownloadFile("$network_download_url$network_full_version/$network_agent_name",$network_full_file_name)
+        $hash_info = Get-FileHash $network_full_file_name -Algorithm SHA256
         $hash = $hash_info.hash
         Write-Output "Comparing hashes..."
-        if ($hash -eq "982e26ff18def73952f2b9f6276e3855b85bd09efe1c66dad67e2a13faf8d579"){
+        if ($hash -eq $network_hash){
             $download_successful = 1
             Write-Output "Hashes match..."
         }
@@ -141,13 +151,10 @@ else{
     Write-Output "Network agent already present, skiping download and continuing.."
 }
 
-$java_agent_path=$location.path+$directory_separator+"AppServerAgent-4.5.16.28759.zip"
-$machine_agent_path=$location.path+$directory_separator+"machineagent-bundle-64bit-linux-4.5.16.2357.zip"
-$network_agent_path=$location.path+$directory_separator+"appd-netviz-x64-linux-4.5.10.2050.zip"
 $destination_path = $location.path+$directory_separator+"agents.zip"
 
 $compress = @{
-    LiteralPath = $java_agent_path, $machine_agent_path, $network_agent_path 
+    LiteralPath = $java_full_file_name, $machine_full_file_name, $network_full_file_name 
     CompressionLevel = "Fastest"
     DestinationPath = $destination_path
 }
@@ -166,9 +173,6 @@ if ($script_exists -eq "TRUE"){
     Remove-Item $final_script_path      
 }
 
-#$rootPath = "/Users/igor.simoes/Documents/Customers/InternalProjects/agent_installer/agents.zip"
-#   $outputPath = "/Users/igor.simoes/Documents/Customers/InternalProjects/agent_installer/teste_igor"
-#$streamWriter = [System.IO.StreamWriter]$outputPath
 Write-Output "Writing installation commands.."
 $streamWriter = [System.IO.StreamWriter]::new($final_script_path)
 $script_template_path=$location.path+$directory_separator+"script_template.txt"
@@ -184,9 +188,9 @@ $binWriter.Close()
 $binWriter.Dispose()
 
 Write-Output "Removing temp items..."
-Remove-Item $java_agent_path
-Remove-Item $machine_agent_path
-Remove-Item $network_agent_path
+Remove-Item $java_full_file_name
+Remove-Item $machine_full_file_name
+Remove-Item $network_full_file_name
 Remove-Item $destination_path
 Write-Output "Done."
 
