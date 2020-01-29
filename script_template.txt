@@ -1,5 +1,5 @@
 #!/bin/bash
-appd_home="/Users/igor.simoes/Documents/Customers/InternalProjects/self-installing-script/agent_sandbox/"
+appd_home="/opt/appdynamics/"
 is_parameter_valid(){
         if [ "$1" != "" ]; then
                 if [ "$1" == "java" ] | [ "$1" == "" ]; then
