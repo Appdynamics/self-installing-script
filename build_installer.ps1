@@ -1,7 +1,8 @@
 param (
     [int]$ProxyEnabled = 0,#0=no proxy,1=user IE, 2=inform proxy adddress manually 
     [string]$ProxyAddress = "",
-    [boolean]$RemoveIntermediateFiles = $true
+    [boolean]$RemoveIntermediateFiles = $true,
+    [string]$cacertsFile = ""
 )
 
 if ($ProxyEnabled -ne 0){
@@ -34,6 +35,31 @@ Write-Output "Starting to generate script installer..."
 Write-Output "Getting the current directory..."
 $location = Get-Location
 $directory_separator = $([System.IO.Path]::DirectorySeparatorChar)
+
+function addCacerts([string]$caFile, [string]$agent_file, [string]$version){
+    if ($caFile -ne ""){
+        $cacerts_exist = Test-Path $cacertsFile
+        $agent_archive_exist = Test-Path $agent_file
+        if ($cacerts_exist -eq "TRUE" -and $agent_archive_exist -eq "TRUE"){
+            $zip = [System.IO.Compression.ZipFile]::Open($agent_file,"Update")
+            if ($agent_type -eq "machine"){
+                $cacertsEntry = $zip.CreateEntry("conf/cacerts.jks")
+            }
+            if ($agent_file.Substring(0,3) -eq "App"){                
+                $cacertsEntry = $zip.CreateEntry("ver$version/conf/cacerts.jks")
+            }
+            $streamWriter = [System.IO.StreamWriter]::new($cacertsEntry.Open())
+            $streamReader = [System.IO.StreamWriter]::new($caFile)
+            $caContents = $streamReader.ReadToEnd()
+            $streamWriter.Write($caContents)
+            $streamWriter.Flush()
+            $streamWriter.Close()
+            $streamWriter.Dispose()
+
+            $zip.Dispose()
+        }
+    }
+}
 
 Write-Output "Getting list of recent files..."
 $download_base_url = "https://download.appdynamics.com/download/downloadfilelatest/"
@@ -119,6 +145,7 @@ if ($downloaded_hashes_match -ne 1){
         $hashes_match =  CheckHashes $java_full_file_name $java_hash
         if ($hashes_match = 1){
             $download_successful = 1
+            Write-Output "Hashes match. Continuing..."
         } 
         else {
             Write-Output "Hashes don't match, will download again."
@@ -131,7 +158,7 @@ if ($downloaded_hashes_match -ne 1){
     } While ($download_successful –eq 0)
 }
 else{
-    Write-Output "Java agent already present, skiping download and continuing.."
+    Write-Output "Java agent already present, skiping download and continuing."
 }
 
 $download_successful  = 0
@@ -160,6 +187,7 @@ if ($downloaded_hashes_match -ne 1){
         $hashes_match =  CheckHashes $machine_full_file_name $machine_hash
         if ($hashes_match = 1){
             $download_successful = 1
+            Write-Output "Hashes match. Continuing..."
         }
         else {
             Write-Output "Hashes don't match, will download again."
@@ -172,7 +200,7 @@ if ($downloaded_hashes_match -ne 1){
     } While ($download_successful –eq 0)
 }
 else{
-    Write-Output "Machine agent already present, skiping download and continuing.."
+    Write-Output "Machine agent already present, skiping download and continuing."
 }
 $download_successful = 0
 $downloaded_hashes_match = 0
@@ -217,10 +245,23 @@ else{
 
 $destination_path = $location.path+$directory_separator+"agents.zip"
 
-$compress = @{
-    LiteralPath = $java_full_file_name, $machine_full_file_name, $network_full_file_name 
-    CompressionLevel = "Fastest"
-    DestinationPath = $destination_path
+if ($cacertsFile -ne ""){
+    Write-Output "Generating archive with the cacerts file."
+    Write-Output "Renaming cert file from $cacertsFile to ./cacerts.jks."
+    Move-Item -Path $cacertsFile -Destination "./cacerts.jks" -Force
+    $compress = @{
+        LiteralPath = $java_full_file_name, $machine_full_file_name, $network_full_file_name, "./cacerts.jks"
+        CompressionLevel = "Fastest"
+        DestinationPath = $destination_path
+    }
+}
+else{
+    Write-Output "Generating archive with NO cacerts file."
+    $compress = @{
+        LiteralPath = $java_full_file_name, $machine_full_file_name, $network_full_file_name
+        CompressionLevel = "Fastest"
+        DestinationPath = $destination_path
+    }
 }
 
 Write-Output "Compressing download files..."
@@ -239,7 +280,7 @@ if ($script_exists -eq "TRUE"){
 
 Write-Output "Writing installation commands.."
 $streamWriter = [System.IO.StreamWriter]::new($final_script_path)
-$script_template_path=$location.path+$directory_separator+"script_template.txt"
+$script_template_path=$location.path+$directory_separator+"script_template.sh"
 $streamWriter.Write([System.IO.File]::ReadAllText($script_template_path))
 $streamWriter.Close()
 $streamWriter.Dispose()

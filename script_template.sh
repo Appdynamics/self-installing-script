@@ -48,12 +48,22 @@ install(){
 
         if [ $1 == "java" ]; then
                 zip="AppServerAgent-4.5.18.29239.zip"
+                
                 echo "Unziping..."
                 unzip /tmp/agents.zip $zip
 		chmod u+rw $zip
 		chmod a+r $zip
-                unzip $zip
+                unzip $zip                
                 rm -rf $zip
+                cacerts_exist=`unzip -l /tmp/agents.zip | grep cacerts | wc -l`
+                if [ $cacerts_exist == "1" ]; then
+                        echo "Found cacerts.jks file, lets move to the conf directory."
+                        unzip /tmp/agents.zip cacerts.jks
+                        chmod a+r cacerts.jks
+                        chmod u+rw cacerts.jks
+                        mv cacerts.jks "ver4.5.18.29239/conf"
+                fi
+
                 chmod -R a+w "ver4.5.18.29239/logs"
         fi
 
@@ -65,6 +75,15 @@ install(){
                 chmod a+r $zip
                 unzip $zip
                 rm -rf $zip
+
+                cacerts_exist=`unzip -l /tmp/agents.zip | grep cacerts | wc -l`
+                if [ $cacerts_exist == "1" ]; then
+                        echo "Found cacerts.jks file, lets move to the conf directory."
+                        unzip /tmp/agents.zip cacerts.jks
+                        chmod a+r cacerts.jks
+                        chmod u+rw cacerts.jks
+                        mv cacerts.jks "conf"
+                fi
         fi
 
         if [ $1 == "network" ]; then
