@@ -1,7 +1,7 @@
 param (
     [int]$ProxyEnabled = 0,#0=no proxy,1=user IE, 2=inform proxy adddress manually 
     [string]$ProxyAddress = "",
-    [boolean]$RemoveIntermediateFiles = $true,
+    [switch]$DoNotRemoveIntermediateFiles,
     [string]$cacertsFile = ""
 )
 
@@ -292,7 +292,7 @@ $binWriter.Write([System.IO.File]::ReadAllBytes($destination_path))
 $binWriter.Close()
 $binWriter.Dispose()
 
-if ($RemoveIntermediateFiles -eq $true){
+if ($DoNotRemoveIntermediateFiles.IsPresent -eq $false){
     Write-Output "Removing temp items..."
     Remove-Item $java_full_file_name
     Remove-Item $machine_full_file_name

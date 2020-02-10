@@ -1,5 +1,4 @@
 #!/bin/bash
-appd_home="/opt/appdynamics/"
 is_parameter_valid(){
         if [ "$1" != "" ]; then
                 if [ "$1" == "java" ] | [ "$1" == "" ]; then
@@ -50,15 +49,15 @@ install(){
                 zip="AppServerAgent-4.5.18.29239.zip"
                 
                 echo "Unziping..."
-                unzip /tmp/agents.zip $zip
+                unzip -q /tmp/agents.zip $zip
 		chmod u+rw $zip
 		chmod a+r $zip
-                unzip $zip                
+                unzip -q $zip                
                 rm -rf $zip
                 cacerts_exist=`unzip -l /tmp/agents.zip | grep cacerts | wc -l`
                 if [ $cacerts_exist == "1" ]; then
                         echo "Found cacerts.jks file, lets move to the conf directory."
-                        unzip /tmp/agents.zip cacerts.jks
+                        unzip -q /tmp/agents.zip cacerts.jks
                         chmod a+r cacerts.jks
                         chmod u+rw cacerts.jks
                         mv cacerts.jks "ver4.5.18.29239/conf"
@@ -70,29 +69,79 @@ install(){
         if [ $1 == "machine" ]; then
                 zip="machineagent-bundle-64bit-linux-4.5.18.2430.zip"
                 echo "Unziping..."
-                unzip /tmp/agents.zip $zip
+                unzip -q /tmp/agents.zip $zip
 		chmod u+rw $zip
                 chmod a+r $zip
-                unzip $zip
+                unzip -q $zip
                 rm -rf $zip
 
                 cacerts_exist=`unzip -l /tmp/agents.zip | grep cacerts | wc -l`
                 if [ $cacerts_exist == "1" ]; then
                         echo "Found cacerts.jks file, lets move to the conf directory."
-                        unzip /tmp/agents.zip cacerts.jks
+                        unzip -q /tmp/agents.zip cacerts.jks
                         chmod a+r cacerts.jks
                         chmod u+rw cacerts.jks
                         mv cacerts.jks "conf"
                 fi
+     
+                controller_info=`cat conf/controller-info.xml`
+                for ((i=0; i < $args_size; i++)){
+                        if [ "${args[$i]}" == "-MAContURL" ]; then
+                                echo "Setting controller URL to ${args[$i+1]}"
+                                controller_info=`echo $controller_info | sed -E "s/(<controller-host>)(.*)(<\/controller-host>)/<controller-host>${args[$i+1]}<\/controller-host>/g"`
+                        fi
+                        if [ "${args[$i]}" == "-MAContport" ]; then
+                                echo "Setting controller port to ${args[$i+1]}"
+                                controller_info=`echo $controller_info | sed -E "s/(<controller-port>)(.*)(<\/controller-port>)/<controller-port>${args[$i+1]}<\/controller-port>/g"` 
+                        fi
+                        if [ "${args[$i]}" == "-MAContSSL" ]; then
+                                if [ "${args[$i+1]}" -eq 1 ]; then
+                                        echo "Setting controllerSSL to ${args[$i+1]}"
+                                        controller_info=`echo $controller_info | sed -E "s/(<controller-ssl-enabled>)(true|false)(<\/controller-ssl-enabled>)/<controller-ssl-enabled>>true<\/controller-ssl-enabled>/g"`
+                                else
+                                        if [ "${args[$i+1]}" -eq 0 ]; then
+                                                echo "Setting servervisibility to ${args[$i+1]}"
+                                                controller_info=`echo $controller_info | sed -E "s/(<controller-ssl-enabled>)(true|false)(<\/controller-ssl-enabled>)/<controller-ssl-enabled>false<\/controller-ssl-enabled>/g"`
+                                        else
+                                                echo "Invalid controllerSSL configuration, please make sure value is either 1 (enabled) or 0 (disabled)."
+                                        fi
+                                fi 
+                        fi
+                        if [ "${args[$i]}" == "-MAContAccessKey" ]; then
+                                echo "Setting agent access key to ${args[$i+1]}"
+                                controller_info=`echo $controller_info | sed -E "s/(<account-access-key>)(.*)(<\/account-access-key>)/<account-access-key>${args[$i+1]}<\/account-access-key>/g"` 
+                        fi
+                        if [ "${args[$i]}" == "-MAContAccount" ]; then
+                                echo "Setting controller account to ${args[$i+1]}"
+                                controller_info=`echo $controller_info | sed -E "s/(<account-name>)(.*)(<\/account-name>)/<account-name>${args[$i+1]}<\/account-name>/g"`
+                        fi
+                        if [ "${args[$i]}" == "-MASIMEnabled" ]; then
+                                if [ "${args[$i+1]}" -eq 1 ]; then
+                                        echo "Setting servervisibility to ${args[$i+1]}"
+                                        controller_info=`echo $controller_info | sed -E "s/(<sim-enabled>)(true|false)(<\/sim-enabled>)/<sim-enabled>true<\/sim-enabled>/g"`
+                                else
+                                        if [ "${args[$i+1]}" -eq 0 ]; then
+                                                echo "Setting servervisibility to ${args[$i+1]}"
+                                                controller_info=`echo $controller_info | sed -E "s/(<sim-enabled>)(true|false)(<\/sim-enabled>)/<sim-enabled>false<\/sim-enabled>/g"`
+                                        else
+                                                echo "Invalid SIM configuration, please make sure value is either 1 (enabled) or 0 (disabled)."
+                                        fi
+                                fi
+                        fi
+                        if [ "${args[$i]}" == "-MAHierarchy" ]; then
+                                echo "Setting controller URL to ${args[$i+1]}"
+                                controller_info=`echo $controller_info | sed "s/<machine-path>false<\/machine-path>/<machine-path>${args[$i+1]}<\/machine-path>/g"` 
+                        fi
+                }
         fi
 
         if [ $1 == "network" ]; then
                 zip="appd-netviz-x64-linux-4.5.11.2100.zip"
                 echo "Unziping..."
-                unzip /tmp/agents.zip $zip
+                unzip -q /tmp/agents.zip $zip
 		chmod u+rw $zip
                 chmod a+r $zip
-                unzip $zip
+                unzip -q $zip
                 rm -rf $zip
                 sudo ./install.sh
         fi
@@ -101,7 +150,18 @@ install(){
         cd $initial_dir
 }
 
-if [ "$1" == "" ];  then
+### BEGIN MAIN SCRIPT ###
+if [ "$2" == "-AppDHome" ]; then
+        appd_home=$3
+else
+        appd_home="/opt/appdynamics/"
+fi
+echo "AppD home set to $appd_home."
+
+args=("$@")
+args_size=$#
+
+if [ "$1" == "all" ];  then
         echo "Installing all the agents: Java, Machine and Network"
 
         unpack
