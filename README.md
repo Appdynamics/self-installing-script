@@ -13,6 +13,13 @@ Download the release package and run the powershell script build_installer.ps1. 
 
 Transfer this script to the linux boxes and proceed with the installation. This will place all the three agents on the right directories with the right permissions. Just the start of the applications will need to be added manually later so apps can load the agent during initialiation.
 
+## Known issues: 
+
+1. Powershell files corrupted:
+   - Powershell script is getting corrupted when zipped, so recomendation is to clone the the repo. Even in such cases the powershell may get corrupted, in that case just copy and paste the code straight from GitHub. 
+2. Automaticcally download may fail depending on network configuration.
+   - In such cases just download the files manually and place on the same folder where the Powershell script is located. When running the Powershell script, it will check that the downloaded files are valid and will proceed with buinding the bash script.
+
 ## New to this version
 
 Powershell now has 4 parameters that can be used: 
