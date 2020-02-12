@@ -51,4 +51,10 @@ First parameter should be "all", meaning to install the 3 agents: java, machine 
     Enables or disables the server visibility for the Machine Agent
 -MAHierarchy
     Sets Machine Agent hierarchy
+-MAUser
+    Sets the user that will run machine agent, if not provided root will be used
+-MAGroup
+    Sets the group that will run machine agent, if not provided will be used the default group for the user.
 ```
+
+Machine Agent startup now is configured upon installation. Script will look for systemctl, and if present will configure SystemD, if not present will try using chkconfig. If chkonfig is not present than will try update-rc.d. If none are present a message will be presented to the user, telling that configuration will have to be done manually.
