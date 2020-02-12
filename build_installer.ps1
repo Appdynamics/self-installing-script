@@ -250,7 +250,7 @@ if ($cacertsFile -ne ""){
     Write-Output "Renaming cert file from $cacertsFile to ./cacerts.jks."
     Move-Item -Path $cacertsFile -Destination "./cacerts.jks" -Force
     $compress = @{
-        LiteralPath = $java_full_file_name, $machine_full_file_name, $network_full_file_name, "./cacerts.jks"
+        LiteralPath = $java_full_file_name, $machine_full_file_name, $network_full_file_name, "./cacerts.jks", "ma_init.sh", "MachineAgentTemplate.service"
         CompressionLevel = "Fastest"
         DestinationPath = $destination_path
     }
@@ -258,7 +258,7 @@ if ($cacertsFile -ne ""){
 else{
     Write-Output "Generating archive with NO cacerts file."
     $compress = @{
-        LiteralPath = $java_full_file_name, $machine_full_file_name, $network_full_file_name
+        LiteralPath = $java_full_file_name, $machine_full_file_name, $network_full_file_name, "ma_init.sh", "MachineAgentTemplate.service"
         CompressionLevel = "Fastest"
         DestinationPath = $destination_path
     }

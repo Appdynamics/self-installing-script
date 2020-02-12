@@ -88,20 +88,24 @@ install(){
                 for ((i=0; i < $args_size; i++)){
                         if [ "${args[$i]}" == "-MAContURL" ]; then
                                 echo "Setting controller URL to ${args[$i+1]}"
-                                controller_info=`echo $controller_info | sed -E "s/(<controller-host>)(.*)(<\/controller-host>)/<controller-host>${args[$i+1]}<\/controller-host>/g"`
+                                cat conf/controller-info.xml | sed -E "s/(<controller-host>)(.*)(<\/controller-host>)/<controller-host>${args[$i+1]}<\/controller-host>/g" > conf/controller-info.xml.temp
+				mv conf/controller-info.xml.temp conf/controller-info.xml
                         fi
                         if [ "${args[$i]}" == "-MAContport" ]; then
                                 echo "Setting controller port to ${args[$i+1]}"
-                                controller_info=`echo $controller_info | sed -E "s/(<controller-port>)(.*)(<\/controller-port>)/<controller-port>${args[$i+1]}<\/controller-port>/g"` 
+                                cat conf/controller-info.xml | sed -E "s/(<controller-port>)(.*)(<\/controller-port>)/<controller-port>${args[$i+1]}<\/controller-port>/g" > conf/controller-info.xml.temp
+				mv conf/controller-info.xml.temp conf/controller-info.xml
                         fi
                         if [ "${args[$i]}" == "-MAContSSL" ]; then
                                 if [ "${args[$i+1]}" -eq 1 ]; then
                                         echo "Setting controllerSSL to ${args[$i+1]}"
-                                        controller_info=`echo $controller_info | sed -E "s/(<controller-ssl-enabled>)(true|false)(<\/controller-ssl-enabled>)/<controller-ssl-enabled>>true<\/controller-ssl-enabled>/g"`
+                                        cat conf/controller-info.xml | sed -E "s/(<controller-ssl-enabled>)(true|false)(<\/controller-ssl-enabled>)/<controller-ssl-enabled>true<\/controller-ssl-enabled>/g" > conf/controller-info.xml.temp
+				  	mv conf/controller-info.xml.temp conf/controller-info.xml
                                 else
                                         if [ "${args[$i+1]}" -eq 0 ]; then
                                                 echo "Setting servervisibility to ${args[$i+1]}"
-                                                controller_info=`echo $controller_info | sed -E "s/(<controller-ssl-enabled>)(true|false)(<\/controller-ssl-enabled>)/<controller-ssl-enabled>false<\/controller-ssl-enabled>/g"`
+                                                cat conf/controller-info.xml | sed -E "s/(<controller-ssl-enabled>)(true|false)(<\/controller-ssl-enabled>)/<controller-ssl-enabled>false<\/controller-ssl-enabled>/g" > conf/controller-info.xml.temp
+						mv conf/controller-info.xml.temp conf/controller-info.xml
                                         else
                                                 echo "Invalid controllerSSL configuration, please make sure value is either 1 (enabled) or 0 (disabled)."
                                         fi
@@ -109,20 +113,24 @@ install(){
                         fi
                         if [ "${args[$i]}" == "-MAContAccessKey" ]; then
                                 echo "Setting agent access key to ${args[$i+1]}"
-                                controller_info=`echo $controller_info | sed -E "s/(<account-access-key>)(.*)(<\/account-access-key>)/<account-access-key>${args[$i+1]}<\/account-access-key>/g"` 
+                                cat conf/controller-info.xml | sed -E "s/(<account-access-key>)(.*)(<\/account-access-key>)/<account-access-key>${args[$i+1]}<\/account-access-key>/g" > conf/controller-info.xml.temp
+				mv conf/controller-info.xml.temp conf/controller-info.xml
                         fi
                         if [ "${args[$i]}" == "-MAContAccount" ]; then
                                 echo "Setting controller account to ${args[$i+1]}"
-                                controller_info=`echo $controller_info | sed -E "s/(<account-name>)(.*)(<\/account-name>)/<account-name>${args[$i+1]}<\/account-name>/g"`
+                                cat conf/controller-info.xml | sed -E "s/(<account-name>)(.*)(<\/account-name>)/<account-name>${args[$i+1]}<\/account-name>/g" > conf/controller-info.xml.temp
+				mv conf/controller-info.xml.temp conf/controller-info.xml
                         fi
                         if [ "${args[$i]}" == "-MASIMEnabled" ]; then
                                 if [ "${args[$i+1]}" -eq 1 ]; then
                                         echo "Setting servervisibility to ${args[$i+1]}"
-                                        controller_info=`echo $controller_info | sed -E "s/(<sim-enabled>)(true|false)(<\/sim-enabled>)/<sim-enabled>true<\/sim-enabled>/g"`
+                                        cat conf/controller-info.xml | sed -E "s/(<sim-enabled>)(true|false)(<\/sim-enabled>)/<sim-enabled>true<\/sim-enabled>/g" > conf/controller-info.xml.temp
+					mv conf/controller-info.xml.temp conf/controller-info.xml
                                 else
                                         if [ "${args[$i+1]}" -eq 0 ]; then
                                                 echo "Setting servervisibility to ${args[$i+1]}"
-                                                controller_info=`echo $controller_info | sed -E "s/(<sim-enabled>)(true|false)(<\/sim-enabled>)/<sim-enabled>false<\/sim-enabled>/g"`
+                                                cat conf/controller-info.xml | sed -E "s/(<sim-enabled>)(true|false)(<\/sim-enabled>)/<sim-enabled>false<\/sim-enabled>/g" > conf/controller-info.xml.temp
+						mv conf/controller-info.xml.temp conf/controller-info.xml
                                         else
                                                 echo "Invalid SIM configuration, please make sure value is either 1 (enabled) or 0 (disabled)."
                                         fi
@@ -130,9 +138,92 @@ install(){
                         fi
                         if [ "${args[$i]}" == "-MAHierarchy" ]; then
                                 echo "Setting controller URL to ${args[$i+1]}"
-                                controller_info=`echo $controller_info | sed "s/<machine-path>false<\/machine-path>/<machine-path>${args[$i+1]}<\/machine-path>/g"` 
+                                cat conf/controller-info.xml | sed "s/<machine-path><\/machine-path>/<machine-path>${args[$i+1]}<\/machine-path>/g" > conf/controller-info.xml.temp
+				mv conf/controller-info.xml.temp conf/controller-info.xml
                         fi
+                        if [ "${args[$i]}" == "-MAUser" ]; then
+                                echo "Setting machine agent user to ${args[$i+1]}"
+                                ma_user=${args[$i+1]}
+                        fi
+                        if [ "${args[$i]}" == "-MAGroup" ]; then
+                                echo "Setting machine agent group to ${args[$i+1]}"
+                                ma_group=${args[$i+1]}
+                        fi
+
                 }
+                echo "Configuring agent init script..."
+                #echo "MA home: $appd_home$1..."
+                machine_agent_home=`pwd | sed "s/\//\\\\\ \//g"`
+                machine_agent_home=`echo $machine_agent_home | sed "s/ //g"`
+                #echo "MA home: $machine_agent_home..."
+                which "systemctl"
+                if [ $? -eq 0 ]; then
+                        #systemctl exists, so lets use it
+                        echo "Unziping Machine Agent unit file..."
+                        unzip -q /tmp/agents.zip "MachineAgentTemplate.service"
+			if [ "$ma_user" != "" ]; then
+				id -u $ma_user > /dev/null
+				if [ $? -eq 1 ]; then
+					echo "User $ma_user does not exist, systemd configuration will not continue. Please configure it manually later."
+					return 1
+				else
+					group_exists=`id -gn $ma_user | grep $ma_group | wc -l`
+					if [ $group_exists -eq 1 ]; then
+						echo "Supplied user $ma_user does not belong to the supplied group, aborting systemd configuration. Please configure it manually later."
+						return 1
+					fi
+				fi
+			else
+                        	ma_user="root"
+			fi                        
+                        if [ "$ma_group" == "" ]; then
+				echo "Group not supplied, defaulting to $ma_user"
+                                ma_group="$ma_user"                       
+                        fi
+                        cat MachineAgentTemplate.service | sed "s/ma_executable/$machine_agent_home\/bin\/machine-agent -d -p $machine_agent_home\/pidfile/g" | sed "s/path_to_pidfile/$machine_agent_home\/pidfile/g" | sed "s/ma_user/$ma_user/g" | sed "s/ma_group/$ma_group/g" > /etc/systemd/system/machine_agent.service
+			echo "Writing unit file machine_agent.service"
+			cat /etc/systemd/system/machine_agent.service
+                        chmod 664 /etc/systemd/system/machine_agent.service
+                        systemctl daemon-reload
+                        systemctl start machine_agent.service
+			systemctl enable machine_agent.service
+			if [ $? -eq 1 ]; then
+				echo "There was a problem configuring Machine Agent on systemd, please check systemd logs and status for troubleshooting."
+				return 1
+			fi
+                else
+                        which "chkconfig"
+                        if [ $? -eq 0 ]; then
+                                #chkconfig exists, so lets use it
+                                echo "Unziping Machine Agent init script..."
+                                unzip -q /tmp/agents.zip "ma_init.sh"
+                                MAInitScript=`cat ma_init.sh`
+                                if [ "$ma_user" == "" ]; then
+                                        $ma_user="root"                        
+                                fi
+                                MAInitScript=`echo $MAInitScript | sed "s/USER=\"\"/USER=\"$ma_user\"/g"`
+                                MAInitScript=`echo $MAInitScript | sed "s/AGENT_HOME=\"\"/AGENT_HOME=\"$machine_agent_home\"/g"`
+                                echo $MAInitScript > /etc/init.d/machine_agent
+                                chmod +x /etc/init.d/machine_agent
+                                chkconfig machine_agent on
+                        else
+                                which "update-rc.d"
+                                if [ $? -eq 0 ]; then
+                                        #update-rc.d exists, so lets use it
+                                        MAInitScript=`cat ma_init.sh`
+                                        if [ "$ma_user" == "" ]; then
+                                                $ma_user="root"                        
+                                        fi
+                                        MAInitScript=`echo $MAInitScript | sed "s/USER=\"\"/USER=\"$ma_user\"/g"`
+                                        MAInitScript=`echo $MAInitScript | sed "s/AGENT_HOME=\"\"/AGENT_HOME=\"$machine_agent_home\"/g"`
+                                        echo $MAInitScript > /etc/init.d/machine_agent
+                                        chmod +x /etc/init.d/machine_agent
+                                        update-rc.d AppDynamicsController defaults 80 
+                                else
+                                        echo "Could not find any of these commands: systemctl, chkconfig, update-rc.d. Agent startup configuration must be done manually."
+                                fi
+                        fi
+                fi
         fi
 
         if [ $1 == "network" ]; then
@@ -156,6 +247,7 @@ if [ "$2" == "-AppDHome" ]; then
 else
         appd_home="/opt/appdynamics/"
 fi
+
 echo "AppD home set to $appd_home."
 
 args=("$@")
