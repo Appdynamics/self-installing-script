@@ -93,23 +93,27 @@ install(){
 				mv conf/controller-info.xml.temp conf/controller-info.xml
                         fi
                         if [ "${args[$i]}" == "-MAContport" ]; then
-                                if ! [ "${args[$i+1]}" =~ ^[0-9]+$ ]; then
-                                        echo "Invalid -MAContport parameter, value should be integer"
+                                arg_value=${args[$i+1]}
+                                if ! [ "$arg_value" -eq "$arg_value" ] 2>/dev/null ; then
+                                        echo "Invalid -MAContport parameter, value should be 0=false, 1=true. Defaulting to 0."
+                                        arg_value=0
                                 fi
-                                echo "Setting controller port to ${args[$i+1]}"
-                                cat conf/controller-info.xml | sed -E "s/(<controller-port>)(.*)(<\/controller-port>)/<controller-port>${args[$i+1]}<\/controller-port>/g" > conf/controller-info.xml.temp
+                                echo "Setting controller port to $arg_value"
+                                cat conf/controller-info.xml | sed -E "s/(<controller-port>)(.*)(<\/controller-port>)/<controller-port>$arg_value<\/controller-port>/g" > conf/controller-info.xml.temp
 				mv conf/controller-info.xml.temp conf/controller-info.xml
                         fi
                         if [ "${args[$i]}" == "-MAContSSL" ]; then
-                                if ! [ "${args[$i+1]}" =~ ^[0-1]+$ ]; then
-                                        echo "Invalid -MAContSSL parameter, value should be 0=false, 1=true"
+                                arg_value=${args[$i+1]}
+                                if ! [ "$arg_value" -eq "$arg_value" ] 2>/dev/null ; then
+                                        echo "Invalid -MAContSSL parameter, value should be 0=false, 1=true. Defaulting to 0."
+                                        arg_value=0
                                 fi
-                                if [ ${args[$i+1]} -eq 1 ]; then
+                                if [ $arg_value -eq 1 ]; then
                                         echo "Setting controllerSSL to ${args[$i+1]}"
                                         cat conf/controller-info.xml | sed -E "s/(<controller-ssl-enabled>)(true|false)(<\/controller-ssl-enabled>)/<controller-ssl-enabled>true<\/controller-ssl-enabled>/g" > conf/controller-info.xml.temp
 				  	mv conf/controller-info.xml.temp conf/controller-info.xml
                                 else
-                                        if [ ${args[$i+1]} -eq 0 ]; then
+                                        if [ $arg_value -eq 0 ]; then
                                                 echo "Setting servervisibility to ${args[$i+1]}"
                                                 cat conf/controller-info.xml | sed -E "s/(<controller-ssl-enabled>)(true|false)(<\/controller-ssl-enabled>)/<controller-ssl-enabled>false<\/controller-ssl-enabled>/g" > conf/controller-info.xml.temp
 						mv conf/controller-info.xml.temp conf/controller-info.xml
@@ -129,11 +133,13 @@ install(){
 				mv conf/controller-info.xml.temp conf/controller-info.xml
                         fi
                         if [ "${args[$i]}" == "-MASIMEnabled" ]; then
-                                if ! [ "${args[$i+1]}" =~ ^[0-1]+$ ]; then
-                                        echo "Invalid -MASIMEnabled parameter, value should be 0=false, 1=true"
+                                arg_value=${args[$i+1]}
+                                if ! [ "$arg_value" -eq "$arg_value" ] 2>/dev/null ; then
+                                        echo "Invalid -MASIMEnabled parameter, value should be 0=false, 1=true. Defaulting to 0."
+                                        arg_value=0
                                 fi
-                                if [ ${args[$i+1]} -eq 1 ]; then
-                                        echo "Setting servervisibility to ${args[$i+1]}"
+                                if [ $arg_value -eq 1 ]; then
+                                        echo "Setting servervisibility to $arg_value"
                                         cat conf/controller-info.xml | sed -E "s/(<sim-enabled>)(true|false)(<\/sim-enabled>)/<sim-enabled>true<\/sim-enabled>/g" > conf/controller-info.xml.temp
 					mv conf/controller-info.xml.temp conf/controller-info.xml
                                 else
