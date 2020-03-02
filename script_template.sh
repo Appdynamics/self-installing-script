@@ -64,7 +64,7 @@ install(){
                         mv cacerts.jks "ver$java_version/conf"
                 fi
 
-                chmod -R a+w "ver4.5.18.29239/logs"
+                chmod -R a+w "ver$java_version/logs"
         fi
 
         if [ $1 == "machine" ]; then
