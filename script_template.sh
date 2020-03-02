@@ -184,7 +184,7 @@ install(){
 					return 1
 				else
 					group_exists=`id -gn $ma_user | grep $ma_group | wc -l`
-					if [ $group_exists -eq 1 ]; then
+					if [ $group_exists -ne 1 ]; then
 						echo "Supplied user $ma_user does not belong to the supplied group, aborting systemd configuration. Please configure it manually later."
 						return 1
 					fi
