@@ -47,15 +47,15 @@ First parameter should be "all", meaning to install the 3 agents: java, machine 
 -MAContURL
     Sets the controller address for the Machine Agent, this won't change configuration for the Java agent, as these should be configured as parameters
 -MAContport
-    Sets the controller port for the Machine Agent, this won't change configuration for the Java agent, as these should be configured as parameters
+    Sets the controller port for the Machine Agent, this won't change configuration for the Java agent, as these should be configured as parameters. Values should be integer.
 -MAContSSL
-    Sets the controller SSL options for the Machine Agent, this won't change configuration for the Java agent, as these should be configured as parameters
+    Sets the controller SSL options for the Machine Agent, this won't change configuration for the Java agent, as these should be configured as parameters. Values are integer ans should be 0=false or 1=true.
 -MAContAccessKey
     Sets the controller access key for the Machine Agent, this won't change configuration for the Java agent, as these should be configured as parameters
 -MAContAccount
     Sets the controller account for the Machine Agent, this won't change configuration for the Java agent, as these should be configured as parameters
 -MASIMEnabled
-    Enables or disables the server visibility for the Machine Agent
+    Enables or disables the server visibility for the Machine Agent, values are integer ans should be 0=false or 1=true.
 -MAHierarchy
     Sets Machine Agent hierarchy
 -MAUser
@@ -65,3 +65,20 @@ First parameter should be "all", meaning to install the 3 agents: java, machine 
 ```
 
 Machine Agent startup now is configured upon installation. Script will look for systemctl, and if present will configure SystemD, if not present will try using chkconfig. If chkonfig is not present than will try update-rc.d. If none are present a message will be presented to the user, telling that configuration will have to be done manually.
+
+## Usage examples
+
+This will install agent with the designated user and group:
+```
+sudo ./agent_installer.sh all -AppDHome ./opt/appdynamics/ -MAContURL 127.0.0.1 -MAContport 9080 -MAContSSL true -MAContAccessKey dasdsadasdada -MAContAccount customer1 -MASIMEnabled 1 -MAHierarchy "DC 1:Rack 2" -MAUser centos -MAGroup somegroup
+````
+
+This will install with the designated user and using this user's default group:
+```
+sudo ./agent_installer.sh all -AppDHome ./opt/appdynamics/ -MAContURL 127.0.0.1 -MAContport 9080 -MAContSSL true -MAContAccessKey dasdsadasdada -MAContAccount customer1 -MASIMEnabled 1 -MAHierarchy "DC 1:Rack 2" -MAUser centos
+````
+
+This will install everything as user root:
+```
+sudo ./agent_installer.sh all -AppDHome ./opt/appdynamics/ -MAContURL 127.0.0.1 -MAContport 9080 -MAContSSL true -MAContAccessKey dasdsadasdada -MAContAccount customer1 -MASIMEnabled 1 -MAHierarchy "DC 1:Rack 2"
+```
