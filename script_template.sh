@@ -46,7 +46,8 @@ install(){
         fi
 
         if [ $1 == "java" ]; then
-                zip="AppServerAgent-4.5.18.29239.zip"
+                zip="JAVA_AGENT_FULL_NAME" 
+                java_version="JAVA_FULL_VERSION"               
                 
                 echo "Unziping..."
                 unzip -q /tmp/agents.zip $zip
@@ -60,14 +61,14 @@ install(){
                         unzip -q /tmp/agents.zip cacerts.jks
                         chmod a+r cacerts.jks
                         chmod u+rw cacerts.jks
-                        mv cacerts.jks "ver4.5.18.29239/conf"
+                        mv cacerts.jks "ver$java_version/conf"
                 fi
 
                 chmod -R a+w "ver4.5.18.29239/logs"
         fi
 
         if [ $1 == "machine" ]; then
-                zip="machineagent-bundle-64bit-linux-4.5.18.2430.zip"
+                zip="MACHINE_AGENT_FULL_NAME"
                 echo "Unziping..."
                 unzip -q /tmp/agents.zip $zip
 		chmod u+rw $zip
@@ -97,12 +98,12 @@ install(){
 				mv conf/controller-info.xml.temp conf/controller-info.xml
                         fi
                         if [ "${args[$i]}" == "-MAContSSL" ]; then
-                                if [ "${args[$i+1]}" -eq 1 ]; then
+                                if [ ${args[$i+1]} -eq 1 ]; then
                                         echo "Setting controllerSSL to ${args[$i+1]}"
                                         cat conf/controller-info.xml | sed -E "s/(<controller-ssl-enabled>)(true|false)(<\/controller-ssl-enabled>)/<controller-ssl-enabled>true<\/controller-ssl-enabled>/g" > conf/controller-info.xml.temp
 				  	mv conf/controller-info.xml.temp conf/controller-info.xml
                                 else
-                                        if [ "${args[$i+1]}" -eq 0 ]; then
+                                        if [ ${args[$i+1]} -eq 0 ]; then
                                                 echo "Setting servervisibility to ${args[$i+1]}"
                                                 cat conf/controller-info.xml | sed -E "s/(<controller-ssl-enabled>)(true|false)(<\/controller-ssl-enabled>)/<controller-ssl-enabled>false<\/controller-ssl-enabled>/g" > conf/controller-info.xml.temp
 						mv conf/controller-info.xml.temp conf/controller-info.xml
@@ -122,12 +123,12 @@ install(){
 				mv conf/controller-info.xml.temp conf/controller-info.xml
                         fi
                         if [ "${args[$i]}" == "-MASIMEnabled" ]; then
-                                if [ "${args[$i+1]}" -eq 1 ]; then
+                                if [ ${args[$i+1]} -eq 1 ]; then
                                         echo "Setting servervisibility to ${args[$i+1]}"
                                         cat conf/controller-info.xml | sed -E "s/(<sim-enabled>)(true|false)(<\/sim-enabled>)/<sim-enabled>true<\/sim-enabled>/g" > conf/controller-info.xml.temp
 					mv conf/controller-info.xml.temp conf/controller-info.xml
                                 else
-                                        if [ "${args[$i+1]}" -eq 0 ]; then
+                                        if [ ${args[$i+1]} -eq 0 ]; then
                                                 echo "Setting servervisibility to ${args[$i+1]}"
                                                 cat conf/controller-info.xml | sed -E "s/(<sim-enabled>)(true|false)(<\/sim-enabled>)/<sim-enabled>false<\/sim-enabled>/g" > conf/controller-info.xml.temp
 						mv conf/controller-info.xml.temp conf/controller-info.xml
@@ -157,7 +158,7 @@ install(){
                 machine_agent_home=`echo $machine_agent_home | sed "s/ //g"`
                 #echo "MA home: $machine_agent_home..."
                 which "systemctl"
-                if [ $? -eq 0 ]; then
+                if [ $? -eq 0 ]; then   
                         #systemctl exists, so lets use it
                         echo "Unziping Machine Agent unit file..."
                         unzip -q /tmp/agents.zip "MachineAgentTemplate.service"
@@ -227,7 +228,7 @@ install(){
         fi
 
         if [ $1 == "network" ]; then
-                zip="appd-netviz-x64-linux-4.5.11.2100.zip"
+                zip="NETWORK_AGENT_FULL_NAME"
                 echo "Unziping..."
                 unzip -q /tmp/agents.zip $zip
 		chmod u+rw $zip
@@ -235,6 +236,13 @@ install(){
                 unzip -q $zip
                 rm -rf $zip
                 sudo ./install.sh
+        fi
+        echo "Adjusting directory ownership for all agents. User: $ma_user, Group: $ma_group"
+        chown -R "$ma_user":"$ma_group" $appd_home
+        if [ $? -ne 1 ]; then
+                echo "Directories ownership successfully set."
+        else
+                echo "There was a problem manually setting the directories ownership, please do it manually."
         fi
         #echo "tail -n +$((archive + 1)) ../$0 > /tmp/agents.zip"
 

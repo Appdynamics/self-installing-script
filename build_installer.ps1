@@ -281,7 +281,12 @@ if ($script_exists -eq "TRUE"){
 Write-Output "Writing installation commands.."
 $streamWriter = [System.IO.StreamWriter]::new($final_script_path)
 $script_template_path=$location.path+$directory_separator+"script_template.sh"
-$streamWriter.Write([System.IO.File]::ReadAllText($script_template_path))
+$script_template_contents=[System.IO.File]::ReadAllText($script_template_path)
+$script_template_contents=$script_template_contents.Replace("JAVA_AGENT_FULL_NAME",$java_agent_name)
+$script_template_contents=$script_template_contents.Replace("JAVA_FULL_VERSION",$java_full_version)
+$script_template_contents=$script_template_contents.Replace("MACHINE_AGENT_FULL_NAME",$machine_agent_name)
+$script_template_contents=$script_template_contents.Replace("NETWORK_AGENT_FULL_NAME",$network_agent_name)
+$streamWriter.Write()
 $streamWriter.Close()
 $streamWriter.Dispose()
 
