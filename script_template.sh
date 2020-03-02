@@ -93,11 +93,17 @@ install(){
 				mv conf/controller-info.xml.temp conf/controller-info.xml
                         fi
                         if [ "${args[$i]}" == "-MAContport" ]; then
+                                if ! [ "${args[$i+1]}" =~ ^[0-9]+$ ]; then
+                                        echo "Invalid -MAContport parameter, value should be integer"
+                                fi
                                 echo "Setting controller port to ${args[$i+1]}"
                                 cat conf/controller-info.xml | sed -E "s/(<controller-port>)(.*)(<\/controller-port>)/<controller-port>${args[$i+1]}<\/controller-port>/g" > conf/controller-info.xml.temp
 				mv conf/controller-info.xml.temp conf/controller-info.xml
                         fi
                         if [ "${args[$i]}" == "-MAContSSL" ]; then
+                                if ! [ "${args[$i+1]}" =~ ^[0-1]+$ ]; then
+                                        echo "Invalid -MAContSSL parameter, value should be 0=false, 1=true"
+                                fi
                                 if [ ${args[$i+1]} -eq 1 ]; then
                                         echo "Setting controllerSSL to ${args[$i+1]}"
                                         cat conf/controller-info.xml | sed -E "s/(<controller-ssl-enabled>)(true|false)(<\/controller-ssl-enabled>)/<controller-ssl-enabled>true<\/controller-ssl-enabled>/g" > conf/controller-info.xml.temp
@@ -123,6 +129,9 @@ install(){
 				mv conf/controller-info.xml.temp conf/controller-info.xml
                         fi
                         if [ "${args[$i]}" == "-MASIMEnabled" ]; then
+                                if ! [ "${args[$i+1]}" =~ ^[0-1]+$ ]; then
+                                        echo "Invalid -MASIMEnabled parameter, value should be 0=false, 1=true"
+                                fi
                                 if [ ${args[$i+1]} -eq 1 ]; then
                                         echo "Setting servervisibility to ${args[$i+1]}"
                                         cat conf/controller-info.xml | sed -E "s/(<sim-enabled>)(true|false)(<\/sim-enabled>)/<sim-enabled>true<\/sim-enabled>/g" > conf/controller-info.xml.temp
