@@ -198,7 +198,7 @@ install(){
                         fi
                         cat MachineAgentTemplate.service | sed "s/ma_executable/$machine_agent_home\/bin\/machine-agent -d -p $machine_agent_home\/pidfile/g" | sed "s/path_to_pidfile/$machine_agent_home\/pidfile/g" | sed "s/ma_user/$ma_user/g" | sed "s/ma_group/$ma_group/g" > /etc/systemd/system/machine_agent.service
 			echo "Writing unit file machine_agent.service"
-			cat /etc/systemd/system/machine_agent.service
+			#cat /etc/systemd/system/machine_agent.service
                         chmod 664 /etc/systemd/system/machine_agent.service
                         systemctl daemon-reload
                         systemctl start machine_agent.service
