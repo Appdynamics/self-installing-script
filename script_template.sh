@@ -237,14 +237,7 @@ install(){
                 rm -rf $zip
                 sudo ./install.sh
         fi
-        echo "Adjusting directory ownership for all agents. User: $ma_user, Group: $ma_group"
-        cd $current_dir
-        chown -R "$ma_user":"$ma_group" $appd_home
-        if [ $? -ne 1 ]; then
-                echo "Directories ownership successfully set."
-        else
-                echo "There was a problem manually setting the directories ownership, please do it manually."
-        fi
+        
         #echo "tail -n +$((archive + 1)) ../$0 > /tmp/agents.zip"
 
         cd $initial_dir
@@ -299,6 +292,17 @@ else
                 shift
         done
         #remove_pack
+fi
+
+if [ "$ma_user" != "" ]; then
+        echo "Adjusting directory ownership for all agents. User: $ma_user, Group: $ma_group"
+        cd $current_dir
+        chown -R "$ma_user":"$ma_group" $appd_home
+        if [ $? -ne 1 ]; then
+                echo "Directories ownership successfully set."
+        else
+                echo "There was a problem manually setting the directories ownership, please do it manually."
+        fi
 fi
 exit 0
 archive:
