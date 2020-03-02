@@ -22,6 +22,12 @@ Transfer this script to the linux boxes and proceed with the installation. This 
 
 ## New to this version
 
+Parameters are now validated. So invalid paramters will fail gracefully instead of crashing the error.
+
+Bash not treats the files properly, so powershell downloaded files are passed properly to the bash for installation. No need to manually updating the generated bash file.
+
+## Parameters for installation
+
 Powershell now has 4 parameters that can be used: 
 
 ```
