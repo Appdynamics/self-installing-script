@@ -286,7 +286,7 @@ $script_template_contents=$script_template_contents.Replace("JAVA_AGENT_FULL_NAM
 $script_template_contents=$script_template_contents.Replace("JAVA_FULL_VERSION",$java_full_version)
 $script_template_contents=$script_template_contents.Replace("MACHINE_AGENT_FULL_NAME",$machine_agent_name)
 $script_template_contents=$script_template_contents.Replace("NETWORK_AGENT_FULL_NAME",$network_agent_name)
-$streamWriter.Write()
+$streamWriter.Write($script_template_contents)
 $streamWriter.Close()
 $streamWriter.Dispose()
 
