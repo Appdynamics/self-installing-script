@@ -238,6 +238,7 @@ install(){
                 sudo ./install.sh
         fi
         echo "Adjusting directory ownership for all agents. User: $ma_user, Group: $ma_group"
+        cd $current_dir
         chown -R "$ma_user":"$ma_group" $appd_home
         if [ $? -ne 1 ]; then
                 echo "Directories ownership successfully set."
@@ -250,6 +251,7 @@ install(){
 }
 
 ### BEGIN MAIN SCRIPT ###
+current_dir=`pwd`
 if [ "$2" == "-AppDHome" ]; then
         appd_home=$3
 else
