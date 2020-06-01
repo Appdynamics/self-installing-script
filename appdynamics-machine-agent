@@ -1,0 +1,205 @@
+#!/bin/sh
+#
+# /etc/init.d/appdynamics-machine-agent
+#
+# This file describes the machine agent service. Copy it or place it in /etc/init.d to ensure the machine
+# agent is started as a service. If you installed the machine agent via an RPM or DEB package, it should
+# already be placed there.
+#
+# Copyright (c) 2014 AppDynamics Inc
+# All rights reserved
+#
+# chkconfig: 2345 95 05
+# description: AppDynamics Machine Agent
+# processname: MachineAgent
+# config: /etc/appdynamics/machine-agent/controller-info.xml
+# config: /etc/appdynamics/machine-agent/logging/log4j.xml
+# config: /etc/sysconfig/appdynamics-machine-agent
+# pidfile: /var/run/appdynamics/appdynamics-machine-agent
+#
+### BEGIN INIT INFO
+# Provides:          appdynamics-machine-agent
+# Required-Start:
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: AppDynamics Machine Agent
+# Description:       Enable AppDynamics Machine Agent service provided by daemon.
+### END INIT INFO
+
+prog="appdynamics-machine-agent"
+lockfile="/var/lock/subsys/$prog"
+
+# Defaults. Do not edit these. They will be overwritten in updates.
+# Override in /etc/sysconfig/appdynamics-machine-agent
+MACHINE_AGENT_HOME=/opt/appdynamics/machine-agent
+JAVA_HOME=$MACHINE_AGENT_HOME/jre
+PIDFILE="/var/run/appdynamics/$prog"
+CURRENT_USER=`whoami`
+
+# source script config, overwrite above variables
+[ -f /etc/sysconfig/appdynamics-machine-agent ] && . /etc/sysconfig/appdynamics-machine-agent
+
+# status_of_proc() is not a standard LSB function. This implementation is taken
+# from /lib/lsb/init-functions on Ubuntu. It is not defined on SuSE, for
+# example. This implementation may be overidden by the sourced
+# lsb/lsb/init-functions below.
+#
+# The license for status_of_proc():
+#
+#     Copyright (c) 2002-08 Chris Lawrence
+#     All rights reserved.
+#
+#     Redistribution and use in source and binary forms, with or without
+#     modification, are permitted provided that the following conditions
+#     are met:
+#     1. Redistributions of source code must retain the above copyright
+#        notice, this list of conditions and the following disclaimer.
+#     2. Redistributions in binary form must reproduce the above copyright
+#        notice, this list of conditions and the following disclaimer in the
+#        documentation and/or other materials provided with the distribution.
+#     3. Neither the name of the author nor the names of other contributors
+#        may be used to endorse or promote products derived from this software
+#        without specific prior written permission.
+#
+#     THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+#     IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+#     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+#     ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE
+#     LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+#     CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+#     SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+#     BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+#     WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+#     OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
+#     EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# Return LSB status
+status_of_proc () {
+
+    pidfile=
+    OPTIND=1
+    while getopts p: opt ; do
+        case "$opt" in
+            p)  pidfile="$OPTARG";;
+        esac
+    done
+    shift `expr $OPTIND - 1`
+
+    if [ -n "$pidfile" ]; then
+        pidfile="-p $pidfile"
+    fi
+    daemon="$1"
+    name="$2"
+
+    status="0"
+    pidofproc $pidfile $daemon >/dev/null || status="$?"
+    if [ "$status" = 0 ]; then
+        log_success_msg "$name is running"
+        return 0
+    elif [ "$status" = 4 ]; then
+        log_failure_msg "could not access PID file for $name"
+        return $status
+    else
+        log_failure_msg "$name is not running"
+        return $status
+    fi
+}
+
+# source function library (distribution-dependent)
+if [ -f /etc/rc.d/init.d/functions ]; then
+    # redhat flavor
+    . /etc/rc.d/init.d/functions
+    start_cmd="daemon --pidfile $PIDFILE --user $MACHINE_AGENT_USER"
+    status_cmd="status -p $PIDFILE $prog"
+    stop_cmd="killproc -p $PIDFILE $prog"
+elif [ -f /lib/lsb/init-functions ]; then
+    # debian or suse flavor
+    . /lib/lsb/init-functions
+    start_cmd="start_daemon -p $PIDFILE --"
+    if [ "$CURRENT_USER" != "$MACHINE_AGENT_USER" ]; then
+        start_cmd="$start_cmd `which sudo` -u $MACHINE_AGENT_USER"
+    fi
+    status_cmd="status_of_proc -p $PIDFILE java $prog"
+    stop_cmd="killproc -p $PIDFILE java"
+else
+    echo "Unable to find function library" 1>&2
+    exit 1
+fi
+
+RETVAL=0
+
+checkroot() {
+    # Check to see if we're running this script as root or sudo
+    if [ `id -u` -ne 0 ]; then
+        echo "This script must be run as sudo or root" 1>&2
+        exit 1
+    fi
+}
+
+start() {
+    checkroot
+    if [ -f $lockfile ] ; then
+        # If the program already started, we should exit. But the exit status should be 0 because starting a service
+        # that is already running should be considered successful.
+        echo "$prog has already been started"
+        exit 0
+    fi
+    # make sure needed dirs are there
+    mkdir -p `dirname $PIDFILE`
+    mkdir -p `dirname $lockfile`
+    mkdir -p "$MACHINE_AGENT_HOME/logs"
+
+    chown -R $MACHINE_AGENT_USER:$MACHINE_AGENT_GROUP \
+        "$MACHINE_AGENT_HOME/conf/controller-info.xml" \
+        "$MACHINE_AGENT_HOME/logs" \
+        "$MACHINE_AGENT_HOME/scripts"
+
+    tmp_pidfile="/tmp/$prog"
+
+    echo -n "Starting $prog:"
+    JAVA_OPTS="$JAVA_OPTS"
+    if [ "`expr \"$JAVA_OPTS\" : \".*-Xmx.*\"`" = "0" ];then
+      JAVA_OPTS="$JAVA_OPTS -Xmx256m"
+    fi
+    $start_cmd $MACHINE_AGENT_HOME/bin/machine-agent -j $JAVA_HOME -d -p $tmp_pidfile $JAVA_OPTS
+    RETVAL=$?
+    [ "$RETVAL" = 0 ] && touch $lockfile
+    # tmp_pidfile is created by user MACHINE_AGENT_USER, which may not have permission to write PIDFILE
+    mv $tmp_pidfile $PIDFILE 
+    echo
+}
+
+stop() {
+    checkroot
+    echo -n "Stopping $prog:"
+    $stop_cmd
+    RETVAL=$?
+    [ "$RETVAL" = 0 ] && rm -f $lockfile
+    echo
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        if [ -f $lockfile ] ; then
+            stop
+            # avoid race
+            sleep 3
+            start
+        fi
+        ;;
+    status)
+        $status_cmd
+        RETVAL=$?
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        RETVAL=1
+esac
+exit $RETVAL

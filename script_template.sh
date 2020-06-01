@@ -89,7 +89,11 @@ install(){
                 for ((i=0; i < $args_size; i++)){
                         if [ "${args[$i]}" == "-MAContURL" ]; then
                                 echo "Setting controller URL to ${args[$i+1]}"
-                                cat conf/controller-info.xml | sed -E "s/(<controller-host>)(.*)(<\/controller-host>)/<controller-host>${args[$i+1]}<\/controller-host>/g" > conf/controller-info.xml.temp
+                                if [ -f /etc/SuSe-release ]; then
+                                        cat conf/controller-info.xml | sed "s/(<controller-host>)(.*)(<\/controller-host>)/<controller-host>${args[$i+1]}<\/controller-host>/g" > conf/controller-info.xml.temp
+                                else
+                                        cat conf/controller-info.xml | sed -E "s/(<controller-host>)(.*)(<\/controller-host>)/<controller-host>${args[$i+1]}<\/controller-host>/g" > conf/controller-info.xml.temp
+                                fi
 				mv conf/controller-info.xml.temp conf/controller-info.xml
                         fi
                         if [ "${args[$i]}" == "-MAContport" ]; then
@@ -99,7 +103,11 @@ install(){
                                         arg_value=0
                                 fi
                                 echo "Setting controller port to $arg_value"
-                                cat conf/controller-info.xml | sed -E "s/(<controller-port>)(.*)(<\/controller-port>)/<controller-port>$arg_value<\/controller-port>/g" > conf/controller-info.xml.temp
+                                if [ -f /etc/SuSe-release ]; then
+                                        cat conf/controller-info.xml | sed "s/(<controller-port>)(.*)(<\/controller-port>)/<controller-port>$arg_value<\/controller-port>/g" > conf/controller-info.xml.temp
+                                else
+                                        cat conf/controller-info.xml | sed -E "s/(<controller-port>)(.*)(<\/controller-port>)/<controller-port>$arg_value<\/controller-port>/g" > conf/controller-info.xml.temp
+                                fi
 				mv conf/controller-info.xml.temp conf/controller-info.xml
                         fi
                         if [ "${args[$i]}" == "-MAContSSL" ]; then
@@ -110,13 +118,21 @@ install(){
                                 fi
                                 if [ $arg_value -eq 1 ]; then
                                         echo "Setting controllerSSL to ${args[$i+1]}"
-                                        cat conf/controller-info.xml | sed -E "s/(<controller-ssl-enabled>)(true|false)(<\/controller-ssl-enabled>)/<controller-ssl-enabled>true<\/controller-ssl-enabled>/g" > conf/controller-info.xml.temp
-				  	mv conf/controller-info.xml.temp conf/controller-info.xml
+                                        if [ -f /etc/SuSe-release ]; then
+                                                cat conf/controller-info.xml | sed "s/(<controller-ssl-enabled>)(true|false)(<\/controller-ssl-enabled>)/<controller-ssl-enabled>true<\/controller-ssl-enabled>/g" > conf/controller-info.xml.temp
+                                        else
+                                                cat conf/controller-info.xml | sed -E "s/(<controller-ssl-enabled>)(true|false)(<\/controller-ssl-enabled>)/<controller-ssl-enabled>true<\/controller-ssl-enabled>/g" > conf/controller-info.xml.temp
+				  	fi
+                                        mv conf/controller-info.xml.temp conf/controller-info.xml
                                 else
                                         if [ $arg_value -eq 0 ]; then
                                                 echo "Setting servervisibility to ${args[$i+1]}"
-                                                cat conf/controller-info.xml | sed -E "s/(<controller-ssl-enabled>)(true|false)(<\/controller-ssl-enabled>)/<controller-ssl-enabled>false<\/controller-ssl-enabled>/g" > conf/controller-info.xml.temp
-						mv conf/controller-info.xml.temp conf/controller-info.xml
+                                                if [ -f /etc/SuSe-release ]; then
+                                                        cat conf/controller-info.xml | sed "s/(<controller-ssl-enabled>)(true|false)(<\/controller-ssl-enabled>)/<controller-ssl-enabled>false<\/controller-ssl-enabled>/g" > conf/controller-info.xml.temp
+                                                else
+                                                        cat conf/controller-info.xml | sed -E "s/(<controller-ssl-enabled>)(true|false)(<\/controller-ssl-enabled>)/<controller-ssl-enabled>false<\/controller-ssl-enabled>/g" > conf/controller-info.xml.temp
+						fi
+                                                mv conf/controller-info.xml.temp conf/controller-info.xml
                                         else
                                                 echo "Invalid controllerSSL configuration, please make sure value is either 1 (enabled) or 0 (disabled)."
                                         fi
@@ -124,13 +140,21 @@ install(){
                         fi
                         if [ "${args[$i]}" == "-MAContAccessKey" ]; then
                                 echo "Setting agent access key to ${args[$i+1]}"
-                                cat conf/controller-info.xml | sed -E "s/(<account-access-key>)(.*)(<\/account-access-key>)/<account-access-key>${args[$i+1]}<\/account-access-key>/g" > conf/controller-info.xml.temp
-				mv conf/controller-info.xml.temp conf/controller-info.xml
+                                if [ -f /etc/SuSe-release ]; then
+                                        cat conf/controller-info.xml | sed "s/(<account-access-key>)(.*)(<\/account-access-key>)/<account-access-key>${args[$i+1]}<\/account-access-key>/g" > conf/controller-info.xml.temp
+                                else
+                                        cat conf/controller-info.xml | sed -E "s/(<account-access-key>)(.*)(<\/account-access-key>)/<account-access-key>${args[$i+1]}<\/account-access-key>/g" > conf/controller-info.xml.temp
+				fi
+                                mv conf/controller-info.xml.temp conf/controller-info.xml
                         fi
                         if [ "${args[$i]}" == "-MAContAccount" ]; then
                                 echo "Setting controller account to ${args[$i+1]}"
-                                cat conf/controller-info.xml | sed -E "s/(<account-name>)(.*)(<\/account-name>)/<account-name>${args[$i+1]}<\/account-name>/g" > conf/controller-info.xml.temp
-				mv conf/controller-info.xml.temp conf/controller-info.xml
+                                if [ -f /etc/SuSe-release ]; then
+                                        cat conf/controller-info.xml | sed "s/(<account-name>)(.*)(<\/account-name>)/<account-name>${args[$i+1]}<\/account-name>/g" > conf/controller-info.xml.temp
+                                else
+                                        cat conf/controller-info.xml | sed -E "s/(<account-name>)(.*)(<\/account-name>)/<account-name>${args[$i+1]}<\/account-name>/g" > conf/controller-info.xml.temp
+				fi
+                                mv conf/controller-info.xml.temp conf/controller-info.xml
                         fi
                         if [ "${args[$i]}" == "-MASIMEnabled" ]; then
                                 arg_value=${args[$i+1]}
@@ -140,13 +164,21 @@ install(){
                                 fi
                                 if [ $arg_value -eq 1 ]; then
                                         echo "Setting servervisibility to $arg_value"
-                                        cat conf/controller-info.xml | sed -E "s/(<sim-enabled>)(true|false)(<\/sim-enabled>)/<sim-enabled>true<\/sim-enabled>/g" > conf/controller-info.xml.temp
-					mv conf/controller-info.xml.temp conf/controller-info.xml
+                                        if [ -f /etc/SuSe-release ]; then
+                                                cat conf/controller-info.xml | sed "s/(<sim-enabled>)(true|false)(<\/sim-enabled>)/<sim-enabled>true<\/sim-enabled>/g" > conf/controller-info.xml.temp
+                                        else
+                                                cat conf/controller-info.xml | sed -E "s/(<sim-enabled>)(true|false)(<\/sim-enabled>)/<sim-enabled>true<\/sim-enabled>/g" > conf/controller-info.xml.temp
+					fi
+                                        mv conf/controller-info.xml.temp conf/controller-info.xml
                                 else
                                         if [ ${args[$i+1]} -eq 0 ]; then
                                                 echo "Setting servervisibility to ${args[$i+1]}"
-                                                cat conf/controller-info.xml | sed -E "s/(<sim-enabled>)(true|false)(<\/sim-enabled>)/<sim-enabled>false<\/sim-enabled>/g" > conf/controller-info.xml.temp
-						mv conf/controller-info.xml.temp conf/controller-info.xml
+                                                if [ -f /etc/SuSe-release ]; then
+                                                        cat conf/controller-info.xml | sed "s/(<sim-enabled>)(true|false)(<\/sim-enabled>)/<sim-enabled>false<\/sim-enabled>/g" > conf/controller-info.xml.temp
+                                                else
+                                                        cat conf/controller-info.xml | sed -E "s/(<sim-enabled>)(true|false)(<\/sim-enabled>)/<sim-enabled>false<\/sim-enabled>/g" > conf/controller-info.xml.temp
+						fi
+                                                mv conf/controller-info.xml.temp conf/controller-info.xml
                                         else
                                                 echo "Invalid SIM configuration, please make sure value is either 1 (enabled) or 0 (disabled)."
                                         fi
@@ -207,6 +239,49 @@ install(){
 				echo "There was a problem configuring Machine Agent on systemd, please check systemd logs and status for troubleshooting."
 				return 1
 			fi
+                elif [ -f /sbin/service ]; then
+                        if [ "$ma_user" != "" ]; then
+				id -u $ma_user > /dev/null
+				if [ $? -eq 1 ]; then
+					echo "User $ma_user does not exist, systemd configuration will not continue. Please configure it manually later."
+					return 1
+				else
+					group_exists=`id -gn $ma_user | grep $ma_group | wc -l`
+					if [ $group_exists -ne 1 ]; then
+						echo "Supplied user $ma_user does not belong to the supplied group, aborting systemd configuration. Please configure it manually later."
+						return 1
+					fi
+				fi
+			else
+                        	ma_user="root"
+			fi                        
+                        if [ "$ma_group" == "" ]; then
+				echo "Group not supplied, defaulting to $ma_user"
+                                ma_group="$ma_user"                       
+                        fi
+                        echo "Configuring Service /sbin/service"
+
+                        echo "Unziping Machine Agent init script..."
+                        unzip -q /tmp/agents.zip "appdynamics-machine-agent"
+                        MAInitScript=`cat appdynamics-machine-agent`
+                        if [ "$ma_user" == "" ]; then
+                                $ma_user="root"                        
+                        fi
+                        MAInitScript=`echo $MAInitScript | sed "s/MACHINE_AGENT_HOME=\/opt\/appdynamics\/machine-agent/MACHINE_AGENT_HOME=\"$machine_agent_home\"/g"`
+                        echo $MAInitScript > /etc/init.d/appdynamics-machine-agent
+                        chmod +x /etc/init.d/appdynamics-machine-agent
+
+                        echo "Configuring the environments for the machine agent"
+                        unzip -q /tmp/agents.zip "appdy-sysconfig"
+                        MAConfigScript=`cat appdy-sysconfig`
+                        MAConfigScript=`echo $MAConfigScript | sed "s/MACHINE_AGENT_USER=changeit/MACHINE_AGENT_USER=\"$ma_user\"/g"`
+                        MAConfigScript=`echo $MAConfigScript | sed "s/MACHINE_AGENT_GROUP=changeit/MACHINE_AGENT_GROUP=\"$ma_group\"/g"`
+                        MAConfigScript=`echo $MAConfigScript | sed "s/MACHINE_AGENT_HOME=\/opt\/appdynamics\/machine-agent/MACHINE_AGENT_HOME=\"$machine_agent_home\"/g"`
+                        MAConfigScript=`echo $MAConfigScript | sed "s/JAVA_HOME=\/opt\/appdynamics\/machine-agent\/jre/JAVA_HOME=\"$machine_agent_home\/jre\"/g"`
+                        echo $MAConfigScript > /etc/sysconfig/appdynamics-machine-agent
+                        chmod +x /etc/sysconfig/appdynamics-machine-agent
+                        chkconfig appdynamics-machine-agent on
+                        echo "Success configuring machine-agent service"
                 else
                         which "chkconfig"
                         if [ $? -eq 0 ]; then
