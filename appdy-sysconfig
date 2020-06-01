@@ -2,5 +2,5 @@
 
 MACHINE_AGENT_HOME=/opt/appdynamics/machine-agent
 JAVA_HOME=/opt/appdynamics/machine-agent/jre
-MACHINE_AGENT_USER=appdynamics-machine-agent
-MACHINE_AGENT_GROUP=appdynamics-machine-agent
+MACHINE_AGENT_USER=changeit
+MACHINE_AGENT_GROUP=changeit
