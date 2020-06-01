@@ -1,0 +1,19 @@
+# WARNING: Before making any changes to this file read the following section carefully
+#
+# After editing the file, make sure the file follows the yml syntax. Common issues include
+# - Using tabs instead of spaces
+# - File encoding should be UTF-8
+#
+# The safest way to edit this file is to copy paste the examples provided and make the
+# necessary changes using a plain text editor instead of a WYSIWYG editor.
+#
+
+# samplingInterval indicates how often to gather metric data. Units in milliseconds.
+samplingInterval: 30000
+
+containerMonitoringConfig:
+    # containerProcessSelectorRegex defines regular expression to evaluate the processes in
+    # each running container to be monitored by the machine agent. The regular expression is
+    # compared against each process full command line within running
+    # If the pattern matches, then the machine agent start monitoring it.
+    containerProcessSelectorRegex: ".*"

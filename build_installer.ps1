@@ -266,9 +266,6 @@ else{
 
 Write-Output "Compressing download files..."
 $archive_exist = Test-Path $destination_path
-if ($archive_exist -eq "TRUE"){
-    Remove-Item $destination_path
-}
 Compress-Archive @compress
 
 $final_script_path = $location.path+$directory_separator+"agent_installer.sh"
@@ -302,7 +299,6 @@ if ($DoNotRemoveIntermediateFiles.IsPresent -eq $false){
     Remove-Item $java_full_file_name
     Remove-Item $machine_full_file_name
     Remove-Item $network_full_file_name
-    Remove-Item $destination_path
     Write-Output "Done."
 }
 else{

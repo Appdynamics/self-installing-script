@@ -1,0 +1,196 @@
+#!/bin/sh
+
+# OPTIONS:
+#    -d            daemonize (run in background)
+#    -p pidfile    write PID to <pidfile>
+#    -h
+#    --help        print command line options
+#    -D prop       set JAVA system property
+#    -X prop       set non-standard JAVA system property
+#    -j JAVA_HOME  set java home for the agent
+
+# CONTROLLING STARTUP:
+#
+# This script relies on few environment variables to determine startup
+# behavior, those variables are:
+#
+#   JAVA_OPTS    -- Additional arguments to the JVM for heap size, etc
+#
+
+# This script is based on the elasticsearch startup script.
+
+SCRIPT="$0"
+
+# SCRIPT may be an arbitrarily deep series of symlinks. Loop until we have the concrete path.
+while [ -h "$SCRIPT" ] ; do
+  ls=`ls -ld "$SCRIPT"`
+  # Drop everything prior to ->
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    SCRIPT="$link"
+  else
+    SCRIPT=`dirname "$SCRIPT"`/"$link"
+  fi
+done
+
+# determine machine agent home
+MACHINE_AGENT_HOME="`dirname "$SCRIPT"`/.."
+
+# make MACHINE_AGENT_HOME absolute
+MACHINE_AGENT_HOME="`cd "$MACHINE_AGENT_HOME"; pwd`"
+
+#Excluded java under sparcv9 and amd64 folder since it is symlink for java under bin and we should use the one under bin
+JAVA=`find "$MACHINE_AGENT_HOME/jre" -name java  -type f 2>/dev/null | grep -v "/sparcv9/java$" 2>/dev/null | grep -v "/amd64/java$" 2>/dev/null | head -n 1 2>/dev/null`
+
+if [ -x "$JAVA" ]; then
+    # Use bundled JRE by default
+    :
+elif [ -x "$JAVA_HOME/bin/java" ]; then
+    JAVA="$JAVA_HOME/bin/java"
+else
+    JAVA="`which java`"
+fi
+
+if [ ! -x "$JAVA" ]; then
+    echo "Could not find any executable java binary. Please install java in your PATH or set JAVA_HOME"
+    exit 1
+fi
+
+LOG4J_CONFIG="-Dlog4j.configuration=file:${MACHINE_AGENT_HOME}/conf/logging/log4j.xml"
+
+STARTUP_OUT="${MACHINE_AGENT_HOME}/logs/startup.out"
+MACHINE_AGENT_JAR_PATH="$MACHINE_AGENT_HOME/machineagent.jar"
+JAVA_OPTS="$JAVA_OPTS"
+if [ "`expr \"$JAVA_OPTS\" : \".*-Xmx.*\"`" = "0" ];then
+  JAVA_OPTS="$JAVA_OPTS -Xmx256m"
+fi
+
+launch_service()
+{
+    pidpath=$1
+    daemonized=$2
+    props=$3
+    javaHome=$4
+
+    # Make sure we dont use any predefined locale, as we check some exception message strings and rely on english
+    # language As those strings are created by the OS, they are dependant on the configured locale
+    LANG=en_US.UTF-8
+    LC_ALL=en_US.UTF-8
+
+    # Set working directory to home
+    cd "$MACHINE_AGENT_HOME"
+
+    if [ -x "$javaHome/bin/java" ] && [ ! -z "$javaHome" ]; then
+        JAVA="$javaHome/bin/java"
+    fi
+
+    echo "Using java executable at $JAVA"
+
+    if [ "x$daemonized" = "x" ]; then
+        exec "$JAVA" $JAVA_OPTS "$LOG4J_CONFIG" $props -jar "$MACHINE_AGENT_JAR_PATH"
+
+        # exec without running it in the background, makes it replace this shell, we'll never get here...
+        # no need to return something
+    else
+        # Startup machine agent, background it, and write the pid.
+        mkdir -p `dirname "$STARTUP_OUT"`
+        exec nohup "$JAVA" $JAVA_OPTS "$LOG4J_CONFIG" $props -jar "$MACHINE_AGENT_JAR_PATH" <&- >>"$STARTUP_OUT" 2>&1 &
+        pid=$!
+        retval=$?
+        echo "$pid" > "$pidpath"
+        return $retval
+    fi
+}
+
+
+
+# Print command line usage / help
+usage() {
+    echo "Usage: $0 [-h] [-j JAVA_HOME] [-p pidfile [-d]] [-D prop] [-X prop]"
+    echo "Start the machine agent."
+    echo "    -d            daemonize (run in background), It is required to"
+    echo "                  supply the pidfile in this mode."
+    echo "    -p pidfile    write PID to <pidfile>"
+    echo "    -h"
+    echo "    --help        print command line options"
+    echo "    -D prop       set JAVA system property"
+    echo "    -X prop       set non-standard JAVA system property"
+    echo "    -j JAVA_HOME  set java home for the agent"
+}
+
+# Parse any long getopt options and put them into properties before calling getopt below
+# Be dash compatible to make sure running under ubuntu works
+ARGV=""
+while [ $# -gt 0 ]
+do
+    case $1 in
+      --help) ARGV="$ARGV -h"; shift;;
+      --*=*) properties="$properties -D${1#--}"
+           shift 1
+           ;;
+      --*) [ $# -le 1 ] && {
+                echo "Option requires an argument: '$1'."
+                usage
+                exit 1
+            }
+           properties="$properties -D${1#--}=$2"
+           shift 2
+        ;;
+      *) ARGV="$ARGV $1" ; shift
+    esac
+done
+
+# Parse any command line options.
+args=`getopt dhj:p:D:X: $ARGV`
+[ $? -eq 0 ] || exit $?
+eval set -- "$args"
+
+while true; do
+    case $1 in
+        -p)
+            pidfile="$2"
+            shift 2
+        ;;
+        -d)
+            daemonized="yes"
+            shift
+        ;;
+        -j)
+            javaHome="$2"
+            shift 2
+        ;;
+        -h)
+            usage
+            exit 0
+        ;;
+        -D)
+            properties="$properties -D$2"
+            shift 2
+        ;;
+        -X)
+            properties="$properties -X$2"
+            shift 2
+        ;;
+        --)
+            shift
+            break
+        ;;
+        *)
+            echo "Error parsing argument $1!" >&2
+            usage
+            exit 1
+        ;;
+    esac
+done
+
+# Check if pidfile is supplied in daemon mode.
+if [ "$daemonized" = "yes" ] && [  -z "$pidfile" ]; then
+    echo "Missing pidfile, while running in daemonized mode it is required to supply the pidfile." >&2
+    usage
+    exit 1
+fi
+
+# Start up the service
+launch_service "$pidfile" "$daemonized" "$properties" "$javaHome"
+
+exit $?

@@ -1,0 +1,61 @@
+Network Agent ZIP instructions
+
+The instructions on how to install and run appd-netviz from zip package is
+divided into 2 parts. The 1st part covers the instructions for the
+administrator and the 2nd part covers the instructions for the Network agent
+user. Administrator is someone who has full sudo access or root access on the
+system. Network agent user is the person who is going to use the package on a
+day to day basis.
+
+Instructions for administrator
+
+1. Get the network agent zip package from Appdynamics and unzip it at a
+   location where the Network agent user has access to. For example, the users
+   home directory.
+   #unzip <pkg.zip> -d <network_agent_home>
+   where pkg.zip is the name of the zip archive and network_agent_home is the
+   name of the directory where you want to install the agent.
+
+2. Change ownership of all files in network_agent_home to that of the user who
+   is going to use the agent.
+   #chown -R <network_agent_user>:<network_agent_user> <network_agent_home>
+   where network_agent_user is the user who is going to use the agent. 
+
+3. Go to network_agent_home directory and run the install script.
+   #cd <network_agent_home>
+   #./install.sh
+
+Instructions for Network Agent User
+
+All of the following commands should be run from <network_agent_home> directory
+
+- Command to start Network Agent.
+  #./bin/start.sh
+  On successful startup you should see the following
+  Starting AppDynamics Network Monitoring appd-netviz...
+  OK
+  appd-netviz running.. <pid_of_process>
+
+- Command to stop Network Agent.
+  #./bin/stop.sh
+  On successful shutdown you should see the following on the console
+  Stopping AppDynamics Network Monitoring appd-netviz
+  OK 
+
+- Command to check whether Network Agent is running or not.
+  #./bin/appd-netviz.sh status
+
+- Command to restart Network Agent.
+  #./bin/appd-netviz.sh restart
+
+- To uninstall the Network Agent first stop the Network Agent. Then delete the
+  <network_agent_home> directory 
+
+- Log files can be found in <network_agent_home>/logs/
+
+- Sometimes it might be necessary to debug the metrics which are being sent
+  out by the Network Agent. To enable writing the metrics to file the following
+  command can be used.
+  NOTE: This should only be done for debugging purposes.
+  #kill -s USR1 `pidof appd-netagent`
+  To turn off writing the metrics to file use the same command again.

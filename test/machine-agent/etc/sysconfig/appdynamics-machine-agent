@@ -1,0 +1,16 @@
+#!/bin/sh
+
+MACHINE_AGENT_HOME=/opt/appdynamics/machine-agent
+JAVA_HOME=/opt/appdynamics/machine-agent/jre
+MACHINE_AGENT_USER=appdynamics-machine-agent
+MACHINE_AGENT_GROUP=appdynamics-machine-agent
+PIDFILE=/var/run/appdynamics/appdynamics-machine-agent
+
+# Specify SysV agent system properties by setting or editing JAVA_OPTS here,
+# properties should be surrounded by quotes and separated from each other by space, e.g.,
+# JAVA_OPTS="-D<sys-property1>=<value1> -D<sys-property2>=<value2>"
+
+# Note: If you would like to change MACHINE_AGENT_USER you must also ensure that
+# the desired user has read access to controller-info.xml as well as write access
+# to the log file. You can change specific file permissions or, most simply, do a
+# chown command to give the desired user ownership of the MACHINE_AGENT_HOME directory.

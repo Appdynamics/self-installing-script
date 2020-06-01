@@ -1,0 +1,6 @@
+# Set to true to enable.
+enabled: false
+
+# Indicates how often (in millisecond) the crash guard is executed.
+executingIntervalInMillis: 60000
+

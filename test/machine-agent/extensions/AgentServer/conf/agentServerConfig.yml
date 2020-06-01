@@ -1,0 +1,11 @@
+# Set to true to enable.
+# Overridden by the "metric.http.listener" system property if specified.
+enabled: false
+
+# The port number to use for serving the API.
+# Overridden by the "metric.http.listener.port" system property if specified.
+port: 8293
+
+# The host/IP address to use for serving the API. The default makes the API only available locally.
+# Overridden by the "metric.http.listener.host" system property if specified.
+host: localhost
