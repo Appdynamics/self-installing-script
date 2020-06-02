@@ -116,7 +116,7 @@ if [ -f /etc/rc.d/init.d/functions ]; then
 elif [ -f /lib/lsb/init-functions ]; then
     # debian or suse flavor
     . /lib/lsb/init-functions
-    start_cmd="start_daemon -p $PIDFILE --"
+    start_cmd="/sbin/start_daemon -p $PIDFILE --"
     if [ "$CURRENT_USER" != "$MACHINE_AGENT_USER" ]; then
         start_cmd="$start_cmd `which sudo` -u $MACHINE_AGENT_USER"
     fi
@@ -155,7 +155,7 @@ start() {
         "$MACHINE_AGENT_HOME/logs" \
         "$MACHINE_AGENT_HOME/scripts"
 
-    tmp_pidfile="/tmp/$prog"
+    tmp_pidfile="/tmp/$prog.pid"
 
     echo -n "Starting $prog:"
     JAVA_OPTS="$JAVA_OPTS"

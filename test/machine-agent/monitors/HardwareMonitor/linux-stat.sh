@@ -171,7 +171,7 @@ printf("name=Custom Metrics|Disks %s|KB written/sec,aggregator=OBSERVATION,value
 
 # disk usage stats
 if [ -n "$MOUNTS" ]; then
-    df -P -k |
+    df -lP -k |
     awk '
 		BEGIN {
 			# The partition name and mount name can contain spaces. Split the df output line with a

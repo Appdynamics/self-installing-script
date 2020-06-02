@@ -1,5 +1,24 @@
 '\" t
 .\" Copyright (c) 2004, 2014, Oracle and/or its affiliates. All rights reserved.
+.\" DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
+.\"
+.\" This code is free software; you can redistribute it and/or modify it
+.\" under the terms of the GNU General Public License version 2 only, as
+.\" published by the Free Software Foundation.
+.\"
+.\" This code is distributed in the hope that it will be useful, but WITHOUT
+.\" ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+.\" FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+.\" version 2 for more details (a copy is included in the LICENSE file that
+.\" accompanied this code).
+.\"
+.\" You should have received a copy of the GNU General Public License version
+.\" 2 along with this work; if not, write to the Free Software Foundation,
+.\" Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
+.\"
+.\" Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+.\" or visit www.oracle.com if you need additional information or have any
+.\" questions.
 .\"
 .\" Title: pack200
 .\" Language: Japanese
@@ -7,8 +26,8 @@
 .\" SectDesc: Javaデプロイメント・ツール
 .\" Software: JDK 8
 .\" Arch: 汎用
-.\" Part Number: E58104-01
-.\" Doc ID: JSSOR
+.\" Part Number: E58103-01
+.\" Doc ID: JSSON
 .\"
 .if n .pl 99999
 .TH "pack200" "1" "2013年11月21日" "JDK 8" "Javaデプロイメント・ツール"
@@ -141,7 +160,7 @@ JARファイルをパックした後アンパックして、JARファイルを�
 \-\-segment\-limit=\fIvalue\fR
 .RS 4
 この値は、各アーカイブ・セグメントの予想ターゲット・サイズ\fIN\fR
-(バイト単位)です。単一の入力ファイルの必要サイズが\fIN\fRバイトを超えると、独立したセグメントが割り当てられます。特殊なケースとして、値が\fB\-1\fRの場合は、すべての入力ファイルを含む大きな単一のセグメントが生成され、値が0の場合は、クラスごとにセグメントが1つずつ生成されます。アーカイブ・セグメントが大きくなると、断片化が少なくなり圧縮率が高くなりますが、その処理には多くのメモリーが必要です。
+(バイト単位)です。単一の入力ファイルの必要サイズが\fIN\fRバイトを超えると、固有のアーカイブ・セグメントが提供されます。特殊なケースとして、値が\fB\-1\fRの場合は、すべての入力ファイルを含む大きな単一のセグメントが生成され、値が0の場合は、クラスごとにセグメントが1つずつ生成されます。アーカイブ・セグメントが大きくなると、断片化が少なくなり圧縮率が高くなりますが、その処理には多くのメモリーが必要です。
 .sp
 各セグメントのサイズは、セグメントに変換されるそれぞれの入力ファイルのサイズのほか、その名前と他の送信されるプロパティのサイズを計算して推測されます。
 .sp

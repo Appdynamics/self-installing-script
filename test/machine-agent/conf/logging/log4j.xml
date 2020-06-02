@@ -6,8 +6,8 @@
             <PatternLayout pattern="%d{ABSOLUTE} %5p [%t] %c{1} - %m%n"/>
         </Console>
 
-        <RollingFile name="FileAppender" fileName="${log4j:configParentLocation}/../../logs/machine-agent.log"
-                     filePattern="${log4j:configParentLocation}/../../logs/machine-agent.log.%i">
+        <RollingFile name="FileAppender" fileName="${sys:appdynamics.agent.logs.dir}/machine-agent.log"
+                     filePattern="${sys:appdynamics.agent.logs.dir}/machine-agent.log.%i">
             <PatternLayout>
                 <Pattern>[%t] %d{DATE} %5p %c{1} - %m%n</Pattern>
             </PatternLayout>

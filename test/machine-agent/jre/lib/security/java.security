@@ -224,17 +224,9 @@ package.access=sun.,\
                jdk.nashorn.tools.,\
                jdk.xml.internal.,\
                com.sun.activation.registries.,\
-               com.sun.browser.,\
-               com.sun.glass.,\
-               com.sun.javafx.,\
-               com.sun.media.,\
-               com.sun.openpisces.,\
-               com.sun.prism.,\
-               com.sun.scenario.,\
-               com.sun.t2k.,\
-               com.sun.pisces.,\
-               com.sun.webkit.,\
-               jdk.management.resource.internal.
+               jdk.jfr.events.,\
+               jdk.jfr.internal.,\
+               jdk.management.jfr.internal.
 
 #
 # List of comma-separated packages that start with or equal this string
@@ -285,17 +277,9 @@ package.definition=sun.,\
                    jdk.nashorn.tools.,\
                    jdk.xml.internal.,\
                    com.sun.activation.registries.,\
-                   com.sun.browser.,\
-                   com.sun.glass.,\
-                   com.sun.javafx.,\
-                   com.sun.media.,\
-                   com.sun.openpisces.,\
-                   com.sun.prism.,\
-                   com.sun.scenario.,\
-                   com.sun.t2k.,\
-                   com.sun.pisces.,\
-                   com.sun.webkit.,\
-                   jdk.management.resource.internal.
+                   jdk.jfr.events.,\
+                   jdk.jfr.internal.,\
+                   jdk.management.jfr.internal.
 
 #
 # Determines whether this properties file can be appended to
@@ -363,7 +347,7 @@ networkaddress.cache.negative.ttl=10
 # By default, the location of the OCSP responder is determined implicitly
 # from the certificate being validated. This property explicitly specifies
 # the location of the OCSP responder. The property is used when the
-# Authority Information Access extension (defined in RFC 3280) is absent
+# Authority Information Access extension (defined in RFC 5280) is absent
 # from the certificate or when it requires overriding.
 #
 # Example,
@@ -442,6 +426,32 @@ networkaddress.cache.negative.ttl=10
 #   krb5.kdc.bad.policy = tryLess:2,2000
 krb5.kdc.bad.policy = tryLast
 
+#
+# Kerberos cross-realm referrals (RFC 6806)
+#
+# OpenJDK's Kerberos client supports cross-realm referrals as defined in
+# RFC 6806. This allows to setup more dynamic environments in which clients
+# do not need to know in advance how to reach the realm of a target principal
+# (either a user or service).
+#
+# When a client issues an AS or a TGS request, the "canonicalize" option
+# is set to announce support of this feature. A KDC server may fulfill the
+# request or reply referring the client to a different one. If referred,
+# the client will issue a new request and the cycle repeats.
+#
+# In addition to referrals, the "canonicalize" option allows the KDC server
+# to change the client name in response to an AS request. For security reasons,
+# RFC 6806 (section 11) FAST scheme is enforced.
+#
+# Disable Kerberos cross-realm referrals. Value may be overwritten with a
+# System property (-Dsun.security.krb5.disableReferrals).
+sun.security.krb5.disableReferrals=false
+
+# Maximum number of AS or TGS referrals to avoid infinite loops. Value may
+# be overwritten with a System property (-Dsun.security.krb5.maxReferrals).
+sun.security.krb5.maxReferrals=5
+
+#
 # Algorithm restrictions for certification path (CertPath) processing
 #
 # In some environments, certain algorithms or key lengths may be undesirable
@@ -1004,6 +1014,16 @@ jdk.xml.dsig.secureValidationPolicy=\
 jceks.key.serialFilter = java.lang.Enum;java.security.KeyRep;\
   java.security.KeyRep$Type;javax.crypto.spec.SecretKeySpec;!*
 
+# The iteration count used for password-based encryption (PBE) in JCEKS
+# keystores. Values in the range 10000 to 5000000 are considered valid.
+# If the value is out of this range, or is not a number, or is unspecified;
+# a default of 200000 is used.
+#
+# If the system property jdk.jceks.iterationCount is also specified, it
+# supersedes the security property value defined here.
+#
+#jdk.jceks.iterationCount = 200000
+
 #
 # Disabled mechanisms for the Simple Authentication and Security Layer (SASL)
 #
@@ -1029,6 +1049,7 @@ jdk.sasl.disabledMechanisms=
 # of which represents a policy for determining if a CA should be distrusted.
 # The supported values are:
 #
+#
 #   SYMANTEC_TLS : Distrust TLS Server certificates anchored by a Symantec
 #   root CA and issued after April 16, 2019 unless issued by one of the
 #   following subordinate CAs which have a later distrust date:
@@ -1038,7 +1059,6 @@ jdk.sasl.disabledMechanisms=
 #     2. Apple IST CA 8 - G1, SHA-256 fingerprint:
 #        A4FE7C7F15155F3F0AEF7AAA83CF6E06DEB97CA3F909DF920AC1490882D488ED
 #        Distrust after December 31, 2019.
-#
 # Leading and trailing whitespace surrounding each value are ignored.
 # Unknown values are ignored. If the property is commented out or set to the
 # empty String, no policies are enforced.
@@ -1080,4 +1100,3 @@ jdk.security.caDistrustPolicies=SYMANTEC_TLS
 # security property value defined here.
 #
 #jdk.security.krb5.default.initiate.credential=always-impersonate
-
