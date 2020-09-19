@@ -1,6 +1,0 @@
-buildName=master-Analytics-master-20.5.0-1986
-buildHash=c4071e8e694f0a3ea5ef1e12833f89117867d787
-buildTimestamp=2020-05-12T22:14:09+0000
-buildNumber=20.5.0-1986
-jobName=Analytics-master
-version=20.5.0-1986

@@ -1,4 +1,0 @@
-# Set to default as false.
-# Set it to true if one wants to start the NetViz Agent using Machine Agent
-# Note: User has to install NetViz Agent before starting it.
-start: false
