@@ -1,90 +1,162 @@
+
 # self-installing-script
 This is a self installing script to facilitate installation of agents. Just run the script and it will generate the corresponding directories with the right permissions.
 
-This is basically composed of a powershell script that downloads the agents and generates the installer to be executed on the Linux boxes. Later versions will generate installers to other systems and technologies.
+This is basically composed of a shell script that downloads the agents and install on the Linux boxes.
 
-On this current version script works just for Linux, script will only self extract itself, create the right folders under <appdynamics-home> directory and set the right permissions. For network-agent, script will also try to install it using sudo.
+On this current version script works just for Linux, script will only self extract itself, create the right folders under <appdynamics-home> directory and set the right permissions. For network-agent, script will also try to install it using sudo as a Machine agent extension.
 
-Still there is a lot to do, but this is a first version of the script.
+There is a lot to do, but this is a socond version of the script.
+
+##Installation flow chart:
+
+```mermaid
+graph LR
+A[Installation start] -- using repository --> B(Download from Repository)
+A -- using local files --> D{Agent Installation}
+B --> D
+
+```
+
 
 ## How to use this script
 
-Download the release package and run the powershell script build_installer.ps1. This script will connect to the AppDynamics website, download the agents and generate the agents_installer.sh script.
+This script has been changed to support any repository using http or local files, it basically downloads the agents from Nexus repository straigh to the linux server where the installation is being executed.
+1. The production version of the script is located in Repository at:  
+2. Transfer that file to the server where the installation is going to be executed
+3. Run the script with all the required parameters below
+   - Script will donwload the informed agents from repository and start the installation process.
 
-Transfer this script to the linux boxes and proceed with the installation. This will place all the three agents on the right directories with the right permissions. Just the start of the applications will need to be added manually later so apps can load the agent during initialiation.
+## How to maintain this script
 
-## Known issues: 
+A fully configured version of this script should be uploaded to Nexus. Every time new agents are released please take the following steps:
+1. Download the agents and add them to repository
+2. Change the agent_installer.sh
+   - Change the variables pointing to the latest agents uploaded to Nexus
+   - No other variables should be changed
+3. Upload the latest version of the agent_installer.sh to Nexus
+   - Script should be upload to /Installers under the name of "linux_java_agent_installer.sh"
+4. Send this script URL to personal that will perform the installation.
 
-1. Powershell files corrupted:
-   - Powershell script is getting corrupted when zipped, so recomendation is to clone the the repo. Even in such cases the powershell may get corrupted, in that case just copy and paste the code straight from GitHub. 
-2. Automaticcally download may fail depending on network configuration.
-   - In such cases just download the files manually and place on the same folder where the Powershell script is located. When running the Powershell script, it will check that the downloaded files are valid and will proceed with buinding the bash script.
+
+## Known issues | Requirements: 
+
+> 1. Installation will try to configure files automatically. If it fails, it will leave the configuration untouched.
+> 2. Script requires 'curl' or 'wget' to download the agents from Nexus
+> 3. For local files use the parameter -Local true, and then put the files in temp_dir="/tmp/appd_temp" as names: java = java-agent.zip, java-bm = java-ibm-agent.zip, machine-agent = machine-agent.zip, cacerts = cacerts.jks
+> 4. If you are not using custom certificates, please put the parameter -Cacerts false
+> 5. sed -E or sed -r are required.
+
+## Tested Versions
+
+|OS              |VERSION         |
+|----------------|----------------|
+|Redhat          |`6+`            |
+|Centos          |`6+`            |
+|Suse            |`11+`           |
+
 
 ## New to this version
 
-Parameters are now validated. So invalid paramters will fail gracefully instead of crashing the error.
-
-Bash not treats the files properly, so powershell downloaded files are passed properly to the bash for installation. No need to manually updating the generated bash file.
+1. Parameters are now validated. So invalid parameters will fail gracefully instead of crashing with error.
+2. Powershell is not required anymore, script must be transfered to the Linux box. Upon execution script will download the files and proceed with the installation.
+3. Installation and configuration of machine agents are more stable, but depending on the Suse version this may require some manual updates to the service
+   - Please check that the service has been properly configured with chkconfig and make the appropriate changes, if needed
+4. Local files are allowed in tmp dir.
+5. Fixes for OS using sed -r and sed -E
+6. Fixes for installing services systemd or sysv
+7. More logs and some minors fixes.
 
 ## Parameters for installation
 
-Powershell now has 4 parameters that can be used: 
+Bash script now has a some new parameters, order of the parameters do not matter anymore. Some are required and some are optional.
 
+
+**-AppDAgentList**
 ```
--ProxyEnabled
-    0=no proxy
-    1=use IE configuration
-    2=inform proxy adddress manually 
--ProxyAddress
-    Full proxy address and port
--DoNotRemoveIntermediateFiles
-    This tells for the downloaded installers not to be removed. On next execution powershell will check locally and if installers are present they will not be downloaded again.
--cacertsFile
-    Location of the JKS file for use with the agents
-````
-
-Bash script now has a lot of new features through parameters
-
-First parameter should be "all", meaning to install the 3 agents: java, machine and network. Other options for this parameter the other options have not been tested and should not be used.
-
+    Agents to be installed now must be informed using this parameter. Options can be: 'java', 'java-ibm', 'java-jdk8', 'machine', 'network', 'all', 'all-ibm', 'all-jdk8'.
+    'network' options requires machine to be also be informed.
+    REQUIRED
+   ```
+   
+**-AppDHome**
 ```
--AppDHome
-    This now lets you change the installation directory. If this is not set it will default to /opt/appdynamics
--MAContURL
+    This parameter is now mandatory, it sets the installation directory. Script will try to create the directory if it does not exists.
+    REQUIRED
+```
+**-MAContURL**
+```
     Sets the controller address for the Machine Agent, this won't change configuration for the Java agent, as these should be configured as parameters
--MAContport
+    REQUIRED
+```
+**-MAContport**
+```
     Sets the controller port for the Machine Agent, this won't change configuration for the Java agent, as these should be configured as parameters. Values should be integer.
--MAContSSL
+    REQUIRED
+```
+**-MAContSSL**
+```
     Sets the controller SSL options for the Machine Agent, this won't change configuration for the Java agent, as these should be configured as parameters. Values are integer ans should be 0=false or 1=true.
--MAContAccessKey
+    REQUIRED
+```
+**-MAContAccessKey**
+```
     Sets the controller access key for the Machine Agent, this won't change configuration for the Java agent, as these should be configured as parameters
--MAContAccount
+    REQUIRED
+```
+**-MAContAccount**
+```
     Sets the controller account for the Machine Agent, this won't change configuration for the Java agent, as these should be configured as parameters
--MASIMEnabled
+    REQUIRED
+```
+**-MASIMEnabled**
+```
     Enables or disables the server visibility for the Machine Agent, values are integer ans should be 0=false or 1=true.
--MAHierarchy
-    Sets Machine Agent hierarchy
--MAUser
+    REQUIRED
+```
+**-MAHierarchy**
+```
+    Sets Machine Agent hierarchy, example: "DC 1:Rack 2" or "New York:HQ" or "VMWARE-LEGACY:VMCLUSTER1"
+    OPTIONAL
+```
+**-MAUser**
+```
     Sets the user that will run machine agent, if not provided root will be used
--MAGroup
+    REQUIRED
+```
+**-MAGroup**
+```
     Sets the group that will run machine agent, if not provided will be used the default group for the user.
+    REQUIRED
+```
+**-MAInit**
+```
+    Sets the init system that will be used. Installer will try to configure them automatically, if it fails configuration can be done manually. Values for this option must be one of these two values: 'sysv' or 'systemd'.
+    OPTIONAL
+```
+**-Local**
+```
+    Sets the script to use local files. Put the files in temp_dir="/tmp/appd_temp" as names: java = java-agent.zip, java-bm = java-ibm-agent.zip, machine-agent = machine-agent.zip, cacerts = cacerts.jks. Values for this option must be : 'true'.
+    OPTIONAL
+```
+**-Cacerts**
+```
+    Sets the script to don't use custom cacerts.jks. Values for this option must be : 'false'.
+    OPTIONAL
 ```
 
-Machine Agent startup now is configured upon installation. Script will look for systemctl, and if present will configure SystemD, if not present will try using chkconfig. If chkonfig is not present than will try update-rc.d. If none are present a message will be presented to the user, telling that configuration will have to be done manually.
+Machine Agent startup now is configured upon installation user must choose either systemd or sysv. If the parameter is not informed, installation will proceed without init system configuration. If configuration commands are not present or init system has not been informed a message will be presented to the user, telling that configuration will have to be done manually.
 
 ## Usage examples
 
-This will install agent with the designated user and group:
-```
-sudo ./agent_installer.sh all -AppDHome ./opt/appdynamics/ -MAContURL 127.0.0.1 -MAContport 9080 -MAContSSL true -MAContAccessKey dasdsadasdada -MAContAccount customer1 -MASIMEnabled 1 -MAHierarchy "DC 1:Rack 2" -MAUser centos -MAGroup somegroup
-````
+This will install agent with the designated user and group, using systemd:
 
-This will install with the designated user and using this user's default group:
 ```
-sudo ./agent_installer.sh all -AppDHome ./opt/appdynamics/ -MAContURL 127.0.0.1 -MAContport 9080 -MAContSSL true -MAContAccessKey dasdsadasdada -MAContAccount customer1 -MASIMEnabled 1 -MAHierarchy "DC 1:Rack 2" -MAUser centos
-````
+sudo ./agent_installer.sh -AppDAgentList all -AppDHome /opt/appdynamics/ -MAContURL controller.domain.com -MAContport 443 -MAContSSL 1 -MAContAccessKey dasd-sadas-sdada-hdhdhdhsdsdsds -MAContAccount customer1 -MASIMEnabled 1 -MAUser centos -MAGroup users -MAInit sytemd
+```
 
-This will install everything as user root:
+This will install agent using local files and not using custom cacerts:
+
 ```
-sudo ./agent_installer.sh all -AppDHome ./opt/appdynamics/ -MAContURL 127.0.0.1 -MAContport 9080 -MAContSSL true -MAContAccessKey dasdsadasdada -MAContAccount customer1 -MASIMEnabled 1 -MAHierarchy "DC 1:Rack 2"
+sudo ./agent_installer.sh -AppDAgentList all -AppDHome /opt/appdynamics/ -MAContURL controller.domain.com -MAContport 443 -MAContSSL 1 -MAContAccessKey dasd-sadas-sdada-hdhdhdhsdsdsds -MAContAccount customer1 -MASIMEnabled 1 -MAUser centos -MAGroup users -MAInit sysv -Cacerts false -Local true
 ```
