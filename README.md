@@ -21,7 +21,7 @@ B --> D
 
 ## How to use this script
 
-This script has been changed to support any repository using http or local files, it basically downloads the agents from Nexus repository straigh to the linux server where the installation is being executed.
+This script has been changed to support any repository using http or local files, it basically downloads the agents from repository straigh to the linux server where the installation is being executed.
 1. The production version of the script is located in Repository at:  
 2. Transfer that file to the server where the installation is going to be executed
 3. Run the script with all the required parameters below
@@ -29,12 +29,12 @@ This script has been changed to support any repository using http or local files
 
 ## How to maintain this script
 
-A fully configured version of this script should be uploaded to Nexus. Every time new agents are released please take the following steps:
+A fully configured version of this script should be uploaded to repository. Every time new agents are released please take the following steps:
 1. Download the agents and add them to repository
 2. Change the agent_installer.sh
-   - Change the variables pointing to the latest agents uploaded to Nexus
+   - Change the variables pointing to the latest agents uploaded to repository
    - No other variables should be changed
-3. Upload the latest version of the agent_installer.sh to Nexus
+3. Upload the latest version of the agent_installer.sh to repository
    - Script should be upload to /Installers under the name of "linux_java_agent_installer.sh"
 4. Send this script URL to personal that will perform the installation.
 
@@ -42,7 +42,7 @@ A fully configured version of this script should be uploaded to Nexus. Every tim
 ## Known issues | Requirements: 
 
 > 1. Installation will try to configure files automatically. If it fails, it will leave the configuration untouched.
-> 2. Script requires 'curl' or 'wget' to download the agents from Nexus
+> 2. Script requires 'curl' or 'wget' to download the agents from repository
 > 3. For local files use the parameter -Local true, and then put the files in temp_dir="/tmp/appd_temp" as names: java = java-agent.zip, java-bm = java-ibm-agent.zip, machine-agent = machine-agent.zip, cacerts = cacerts.jks
 > 4. If you are not using custom certificates, please put the parameter -Cacerts false
 > 5. sed -E or sed -r are required.
